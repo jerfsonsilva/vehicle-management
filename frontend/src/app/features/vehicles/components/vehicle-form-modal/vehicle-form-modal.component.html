@@ -1,14 +1,40 @@
-<h2 mat-dialog-title>{{ isEdit ? 'Edit vehicle' : 'Create vehicle' }}</h2>
+<h2 mat-dialog-title>{{ isEdit ? 'Editar veículo' : 'Cadastrar veículo' }}</h2>
 
 <mat-dialog-content>
   <form class="form-grid" [formGroup]="form">
     <mat-form-field appearance="outline">
-      <mat-label>Plate</mat-label>
-      <input matInput formControlName="plate" placeholder="ABC1D23" />
+      <mat-label>Placa do veículo</mat-label>
+      <input matInput formControlName="licensePlate" placeholder="ABC1D23" />
+      @if (form.controls.licensePlate.touched && form.controls.licensePlate.invalid) {
+        <mat-error>Use o formato ABC1D23.</mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Brand</mat-label>
+      <mat-label>Chassi</mat-label>
+      <input matInput formControlName="chassis" placeholder="9BWZZZ377VT004251" />
+      @if (form.controls.chassis.touched && form.controls.chassis.invalid) {
+        <mat-error>Chassi deve ter exatamente 17 caracteres.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>RENAVAM</mat-label>
+      <input
+        matInput
+        formControlName="registrationNumber"
+        placeholder="12345678901"
+      />
+      @if (
+        form.controls.registrationNumber.touched &&
+        form.controls.registrationNumber.invalid
+      ) {
+        <mat-error>RENAVAM deve ter 11 dígitos.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Marca</mat-label>
       <input matInput formControlName="brand" placeholder="Toyota" />
     </mat-form-field>
 
@@ -18,15 +44,18 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Year</mat-label>
+      <mat-label>Ano</mat-label>
       <input matInput type="number" formControlName="year" placeholder="2024" />
+      @if (form.controls.year.touched && form.controls.year.invalid) {
+        <mat-error>Ano deve estar entre 1900 e 2100.</mat-error>
+      }
     </mat-form-field>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button mat-dialog-close>Cancelar</button>
   <button mat-flat-button (click)="save()">
-    {{ isEdit ? 'Save changes' : 'Create' }}
+    {{ isEdit ? 'Salvar alterações' : 'Cadastrar' }}
   </button>
 </mat-dialog-actions>

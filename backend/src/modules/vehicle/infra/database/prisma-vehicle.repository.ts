@@ -56,9 +56,12 @@ export class PrismaVehicleRepository implements VehicleRepository {
   }
 
   async findAll(): Promise<VehicleEntity[]> {
-    const rows = (await this.vehicleModel.findMany({
+    const rowsRaw = await this.vehicleModel.findMany({
       orderBy: { createdAt: 'desc' },
-    })) as VehiclePersistenceRow[];
+    });
+    const rows = Array.isArray(rowsRaw)
+      ? (rowsRaw as VehiclePersistenceRow[])
+      : [];
 
     return rows.map((row) => VehicleEntityFactory.fromPersistence(row));
   }

@@ -43,7 +43,7 @@ export class VehiclesPage implements OnInit {
         switchMap((payload) => this.vehicleService.create(payload))
       )
       .subscribe(() => {
-        this.snackBar.open('Vehicle created.', 'Close', { duration: 2500 });
+        this.snackBar.open('Veículo cadastrado.', 'Fechar', { duration: 2500 });
         this.store.loadVehicles();
       });
   }
@@ -60,7 +60,7 @@ export class VehiclesPage implements OnInit {
         switchMap((payload) => this.vehicleService.update(vehicle.id, payload))
       )
       .subscribe(() => {
-        this.snackBar.open('Vehicle updated.', 'Close', { duration: 2500 });
+        this.snackBar.open('Veículo atualizado.', 'Fechar', { duration: 2500 });
         this.store.loadVehicles();
       });
   }
@@ -69,9 +69,9 @@ export class VehiclesPage implements OnInit {
     this.dialog
       .open(ConfirmDialogComponent, {
         data: {
-          title: 'Delete vehicle',
-          message: `Delete ${vehicle.brand} ${vehicle.model} (${vehicle.plate})?`,
-          confirmLabel: 'Delete'
+          title: 'Excluir veículo',
+          message: `Deseja excluir ${vehicle.brand} ${vehicle.model} (${vehicle.licensePlate})?`,
+          confirmLabel: 'Excluir'
         }
       })
       .afterClosed()
@@ -80,7 +80,7 @@ export class VehiclesPage implements OnInit {
         switchMap(() => this.vehicleService.delete(vehicle.id))
       )
       .subscribe(() => {
-        this.snackBar.open('Vehicle deleted.', 'Close', { duration: 2500 });
+        this.snackBar.open('Veículo excluído.', 'Fechar', { duration: 2500 });
         this.store.loadVehicles();
       });
   }

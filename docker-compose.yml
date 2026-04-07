@@ -16,16 +16,16 @@ services:
       - backend_sqlite_data:/app/prisma
     restart: unless-stopped
 
-  # Ready for future frontend containerization.
-  # frontend:
-  #   profiles: ["future"]
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "5173:5173"
-  #   depends_on:
-  #     - backend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: test-feedz-frontend
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    restart: unless-stopped
 
 volumes:
   backend_sqlite_data:

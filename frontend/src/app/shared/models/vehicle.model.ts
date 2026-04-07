@@ -1,13 +1,17 @@
 export interface Vehicle {
   id: string;
-  plate: string;
+  licensePlate: string;
+  chassis: string;
+  registrationNumber: string;
   model: string;
   brand: string;
   year: number;
 }
 
 export interface VehiclePayload {
-  plate: string;
+  licensePlate: string;
+  chassis: string;
+  registrationNumber: string;
   model: string;
   brand: string;
   year: number;

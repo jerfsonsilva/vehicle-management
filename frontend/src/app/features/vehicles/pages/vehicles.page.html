@@ -1,9 +1,9 @@
 <app-page-shell
-  title="Vehicle Fleet"
-  subtitle="Simple, modern and scalable vehicle management."
+  title="Frota de veículos"
+  subtitle="Gestão de veículos simples, moderna e escalável."
 >
   <section class="toolbar">
-    <button mat-flat-button (click)="openCreateModal()">Create vehicle</button>
+    <button mat-flat-button (click)="openCreateModal()">Cadastrar veículo</button>
   </section>
 
   @if (store.loading()) {
@@ -12,8 +12,8 @@
     </section>
   } @else if (store.loaded() && !store.vehicles().length) {
     <section class="empty-state">
-      <h3>No vehicles yet</h3>
-      <p>Create your first vehicle to get started.</p>
+      <h3>Nenhum veículo cadastrado</h3>
+      <p>Cadastre seu primeiro veículo para começar.</p>
     </section>
   } @else {
     <app-vehicle-list

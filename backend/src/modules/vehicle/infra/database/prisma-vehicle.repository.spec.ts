@@ -147,6 +147,14 @@ describe('PrismaVehicleRepository', () => {
     expect(result).toEqual([]);
   });
 
+  it('should return empty list on findAll when prisma returns null-ish', async () => {
+    prismaMock.vehicle.findMany.mockResolvedValue(null);
+
+    const result = await repository.findAll();
+
+    expect(result).toEqual([]);
+  });
+
   it('should rethrow unknown findAll error', async () => {
     const unknown = new Error('unknown');
     prismaMock.vehicle.findMany.mockRejectedValue(unknown);
