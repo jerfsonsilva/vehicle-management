@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -24,7 +25,10 @@ export class CreateVehicleUseCase {
       );
 
       return await this.vehicleRepository.create(vehicle);
-    } catch {
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
       throw new InternalServerErrorException('Internal server error');
     }
   }

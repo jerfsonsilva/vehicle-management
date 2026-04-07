@@ -9,6 +9,7 @@ describe('PrismaVehicleRepository', () => {
   let prismaMock: {
     vehicle: {
       create: jest.Mock;
+      findMany: jest.Mock;
       findUnique: jest.Mock;
       update: jest.Mock;
       delete: jest.Mock;
@@ -19,6 +20,7 @@ describe('PrismaVehicleRepository', () => {
     prismaMock = {
       vehicle: {
         create: jest.fn(),
+        findMany: jest.fn(),
         findUnique: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
@@ -104,6 +106,52 @@ describe('PrismaVehicleRepository', () => {
     const result = await repository.findById('id-404');
 
     expect(result).toBeNull();
+  });
+
+  it('should return mapped list on findAll', async () => {
+    prismaMock.vehicle.findMany.mockResolvedValue([
+      {
+        id: 'id-1',
+        licensePlate: 'ABC1D23',
+        chassis: '9BWZZZ377VT004251',
+        registrationNumber: '12345678901',
+        model: 'Onix',
+        brand: 'Chevrolet',
+        year: 2022,
+      },
+      {
+        id: 'id-2',
+        licensePlate: 'XYZ1A11',
+        chassis: '9BWZZZ377VT004252',
+        registrationNumber: '12345678902',
+        model: 'HB20',
+        brand: 'Hyundai',
+        year: 2023,
+      },
+    ]);
+
+    const result = await repository.findAll();
+
+    expect(prismaMock.vehicle.findMany).toHaveBeenCalledWith({
+      orderBy: { createdAt: 'desc' },
+    });
+    expect(result).toHaveLength(2);
+    expect(result[0]).toBeInstanceOf(VehicleEntity);
+  });
+
+  it('should return empty list on findAll when no records', async () => {
+    prismaMock.vehicle.findMany.mockResolvedValue([]);
+
+    const result = await repository.findAll();
+
+    expect(result).toEqual([]);
+  });
+
+  it('should rethrow unknown findAll error', async () => {
+    const unknown = new Error('unknown');
+    prismaMock.vehicle.findMany.mockRejectedValue(unknown);
+
+    await expect(repository.findAll()).rejects.toBe(unknown);
   });
 
   it('should throw not found on update with missing record (P2025)', async () => {

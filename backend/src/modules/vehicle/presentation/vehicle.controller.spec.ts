@@ -4,16 +4,19 @@ import { CreateVehicleUseCase } from '../application/use-cases/create-vehicle.us
 import { GetVehicleUseCase } from '../application/use-cases/get-vehicle.usecase';
 import { UpdateVehicleUseCase } from '../application/use-cases/update-vehicle.usecase';
 import { DeleteVehicleUseCase } from '../application/use-cases/delete-vehicle.usecase';
+import { ListVehiclesUseCase } from '../application/use-cases/list-vehicles.usecase';
 
 describe('VehicleController', () => {
   let controller: VehicleController;
   let createUseCase: { execute: jest.Mock };
+  let listUseCase: { execute: jest.Mock };
   let getUseCase: { execute: jest.Mock };
   let updateUseCase: { execute: jest.Mock };
   let deleteUseCase: { execute: jest.Mock };
 
   beforeEach(async () => {
     createUseCase = { execute: jest.fn() };
+    listUseCase = { execute: jest.fn() };
     getUseCase = { execute: jest.fn() };
     updateUseCase = { execute: jest.fn() };
     deleteUseCase = { execute: jest.fn() };
@@ -22,6 +25,7 @@ describe('VehicleController', () => {
       controllers: [VehicleController],
       providers: [
         { provide: CreateVehicleUseCase, useValue: createUseCase },
+        { provide: ListVehiclesUseCase, useValue: listUseCase },
         { provide: GetVehicleUseCase, useValue: getUseCase },
         { provide: UpdateVehicleUseCase, useValue: updateUseCase },
         { provide: DeleteVehicleUseCase, useValue: deleteUseCase },
@@ -55,6 +59,14 @@ describe('VehicleController', () => {
     expect(getUseCase.execute).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'id-1' }),
     );
+  });
+
+  it('should delegate findAll to ListVehiclesUseCase', async () => {
+    listUseCase.execute.mockResolvedValue([]);
+
+    await controller.findAll();
+
+    expect(listUseCase.execute).toHaveBeenCalledTimes(1);
   });
 
   it('should delegate update to UpdateVehicleUseCase', async () => {

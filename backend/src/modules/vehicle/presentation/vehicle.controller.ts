@@ -16,6 +16,7 @@ import {
   UpdateVehicleUseCase,
 } from '../application/use-cases/update-vehicle.usecase';
 import { GetVehicleUseCase } from '../application/use-cases/get-vehicle.usecase';
+import { ListVehiclesUseCase } from '../application/use-cases/list-vehicles.usecase';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 
@@ -23,6 +24,7 @@ import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 export class VehicleController {
   constructor(
     private readonly createVehicleUseCase: CreateVehicleUseCase,
+    private readonly listVehiclesUseCase: ListVehiclesUseCase,
     private readonly getVehicleUseCase: GetVehicleUseCase,
     private readonly updateVehicleUseCase: UpdateVehicleUseCase,
     private readonly deleteVehicleUseCase: DeleteVehicleUseCase,
@@ -44,6 +46,11 @@ export class VehicleController {
   @Get(':id')
   async findById(@Param('id') id: string) {
     return this.getVehicleUseCase.execute(new GetVehicleQuery(id));
+  }
+
+  @Get()
+  async findAll() {
+    return this.listVehiclesUseCase.execute();
   }
 
   @Patch(':id')

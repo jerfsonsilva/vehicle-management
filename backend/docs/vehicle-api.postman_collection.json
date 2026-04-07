@@ -87,6 +87,22 @@
       }
     },
     {
+      "name": "Vehicle - List All",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehicles"
+          ]
+        }
+      }
+    },
+    {
       "name": "Vehicle - Update",
       "request": {
         "method": "PATCH",

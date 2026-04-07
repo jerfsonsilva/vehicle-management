@@ -10,6 +10,7 @@ import { PrismaErrorUtil } from '../utils/prisma-error.util';
 
 type VehicleModelClient = {
   create: (args: unknown) => Promise<unknown>;
+  findMany: (args?: unknown) => Promise<unknown>;
   findUnique: (args: unknown) => Promise<unknown>;
   update: (args: unknown) => Promise<unknown>;
   delete: (args: unknown) => Promise<unknown>;
@@ -52,6 +53,14 @@ export class PrismaVehicleRepository implements VehicleRepository {
     return found
       ? VehicleEntityFactory.fromPersistence(found as VehiclePersistenceRow)
       : null;
+  }
+
+  async findAll(): Promise<VehicleEntity[]> {
+    const rows = (await this.vehicleModel.findMany({
+      orderBy: { createdAt: 'desc' },
+    })) as VehiclePersistenceRow[];
+
+    return rows.map((row) => VehicleEntityFactory.fromPersistence(row));
   }
 
   async update(vehicle: VehicleEntity): Promise<VehicleEntity> {

@@ -1,4 +1,4 @@
-import { InternalServerErrorException } from '@nestjs/common';
+import { ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { CreateVehicleUseCase } from './create-vehicle.usecase';
 import { VehicleRepository } from '../../domain/repositories/vehicle.repository';
 import { VehicleEntity } from '../../domain/entities/vehicle.entity';
@@ -10,6 +10,7 @@ describe('CreateVehicleUseCase', () => {
   beforeEach(() => {
     repository = {
       create: jest.fn(),
+      findAll: jest.fn(),
       findById: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
@@ -66,5 +67,20 @@ describe('CreateVehicleUseCase', () => {
         year: 2022,
       }),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
+  });
+
+  it('should preserve conflict exception for duplicated data', async () => {
+    repository.create.mockRejectedValue(new ConflictException('Duplicate value'));
+
+    await expect(
+      useCase.execute({
+        licensePlate: 'ABC1D23',
+        chassis: '9BWZZZ377VT004251',
+        registrationNumber: '12345678901',
+        model: 'Onix',
+        brand: 'Chevrolet',
+        year: 2022,
+      }),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 });
