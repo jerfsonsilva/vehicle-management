@@ -1,20 +1,33 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../common/prisma/prisma.service';
 import { VehicleEntity } from '../../domain/entities/vehicle.entity';
 import { VehicleRepository } from '../../domain/repositories/vehicle.repository';
+import {
+  VehicleEntityFactory,
+  VehiclePersistenceRow,
+} from '../factories/vehicle-entity.factory';
+import { PrismaErrorUtil } from '../utils/prisma-error.util';
+
+type VehicleModelClient = {
+  create: (args: unknown) => Promise<unknown>;
+  findUnique: (args: unknown) => Promise<unknown>;
+  update: (args: unknown) => Promise<unknown>;
+  delete: (args: unknown) => Promise<unknown>;
+};
 
 @Injectable()
 export class PrismaVehicleRepository implements VehicleRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly vehicleModel: VehicleModelClient;
+
+  constructor(private readonly prisma: PrismaService) {
+    this.vehicleModel = (
+      this.prisma as PrismaService & { vehicle: VehicleModelClient }
+    ).vehicle;
+  }
 
   async create(vehicle: VehicleEntity): Promise<VehicleEntity> {
     try {
-      const saved = await this.prisma.vehicle.create({
+      const saved = await this.vehicleModel.create({
         data: {
           id: vehicle.id,
           licensePlate: vehicle.licensePlate,
@@ -25,23 +38,25 @@ export class PrismaVehicleRepository implements VehicleRepository {
           year: vehicle.year,
         },
       });
-      return this.toEntity(saved);
+      return VehicleEntityFactory.fromPersistence(saved as VehiclePersistenceRow);
     } catch (error) {
-      this.handleUniqueError(error);
+      PrismaErrorUtil.throwIfUniqueViolation(error);
       throw error;
     }
   }
 
   async findById(id: string): Promise<VehicleEntity | null> {
-    const found = await this.prisma.vehicle.findUnique({
+    const found = await this.vehicleModel.findUnique({
       where: { id },
     });
-    return found ? this.toEntity(found) : null;
+    return found
+      ? VehicleEntityFactory.fromPersistence(found as VehiclePersistenceRow)
+      : null;
   }
 
   async update(vehicle: VehicleEntity): Promise<VehicleEntity> {
     try {
-      const saved = await this.prisma.vehicle.update({
+      const saved = await this.vehicleModel.update({
         where: { id: vehicle.id },
         data: {
           licensePlate: vehicle.licensePlate,
@@ -52,68 +67,22 @@ export class PrismaVehicleRepository implements VehicleRepository {
           year: vehicle.year,
         },
       });
-      return this.toEntity(saved);
+      return VehicleEntityFactory.fromPersistence(saved as VehiclePersistenceRow);
     } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
-        throw new NotFoundException('Vehicle not found');
-      }
-      this.handleUniqueError(error);
+      PrismaErrorUtil.throwIfNotFound(error, 'Vehicle');
+      PrismaErrorUtil.throwIfUniqueViolation(error);
       throw error;
     }
   }
 
   async delete(id: string): Promise<void> {
     try {
-      await this.prisma.vehicle.delete({
+      await this.vehicleModel.delete({
         where: { id },
       });
     } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
-        throw new NotFoundException('Vehicle not found');
-      }
+      PrismaErrorUtil.throwIfNotFound(error, 'Vehicle');
       throw error;
-    }
-  }
-
-  private toEntity(row: {
-    id: string;
-    licensePlate: string;
-    chassis: string;
-    registrationNumber: string;
-    model: string;
-    brand: string;
-    year: number;
-    createdAt: Date;
-    updatedAt: Date;
-  }): VehicleEntity {
-    return new VehicleEntity(
-      row.id,
-      row.licensePlate,
-      row.chassis,
-      row.registrationNumber,
-      row.model,
-      row.brand,
-      row.year,
-      row.createdAt,
-      row.updatedAt,
-    );
-  }
-
-  private handleUniqueError(error: unknown): void {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
-      const target = Array.isArray(error.meta?.target)
-        ? error.meta.target.join(', ')
-        : 'unique field';
-      throw new ConflictException(`Duplicate value for: ${target}`);
     }
   }
 }

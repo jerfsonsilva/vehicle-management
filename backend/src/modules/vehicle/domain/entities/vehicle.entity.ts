@@ -7,7 +7,5 @@ export class VehicleEntity {
     public readonly model: string,
     public readonly brand: string,
     public readonly year: number,
-    public readonly createdAt: Date,
-    public readonly updatedAt: Date,
   ) {}
 }

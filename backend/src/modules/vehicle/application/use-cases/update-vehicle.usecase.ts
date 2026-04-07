@@ -35,12 +35,13 @@ export class UpdateVehicleUseCase {
         command.model ?? current.model,
         command.brand ?? current.brand,
         command.year ?? current.year,
-        current.createdAt,
-        new Date(),
       );
 
       return this.vehicleRepository.update(updated);
-    } catch {
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new InternalServerErrorException('Internal server error');
     }
   }

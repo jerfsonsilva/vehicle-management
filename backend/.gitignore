@@ -9,3 +9,7 @@ migrations
 dev.db
 
 dist
+
+coverage
+
+.vscode/settings.json

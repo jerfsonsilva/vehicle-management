@@ -27,6 +27,7 @@ $ npm run prisma:migrate:dev -- --name init
 ```
 
 The UML for `Vehicle` is documented in `docs/uml-veiculo.md`.
+The architecture standard is documented in `docs/architecture.md`.
 
 ## Compile and run the project
 

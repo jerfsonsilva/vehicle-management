@@ -18,7 +18,10 @@ export class GetVehicleUseCase {
         throw new NotFoundException('Vehicle not found');
       }
       return vehicle;
-    } catch {
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new InternalServerErrorException('Internal server error');
     }
   }

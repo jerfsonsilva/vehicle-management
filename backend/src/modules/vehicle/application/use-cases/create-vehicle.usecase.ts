@@ -13,7 +13,6 @@ export class CreateVehicleUseCase {
 
   async execute(command: CreateVehicleCommand): Promise<VehicleEntity> {
     try {
-      const now = new Date();
       const vehicle = new VehicleEntity(
         randomUUID(),
         command.licensePlate,
@@ -22,11 +21,9 @@ export class CreateVehicleUseCase {
         command.model,
         command.brand,
         command.year,
-        now,
-        now,
       );
 
-      return this.vehicleRepository.create(vehicle);
+      return await this.vehicleRepository.create(vehicle);
     } catch {
       throw new InternalServerErrorException('Internal server error');
     }

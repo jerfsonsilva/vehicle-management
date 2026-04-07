@@ -4,7 +4,6 @@ import { CreateVehicleUseCase } from './application/use-cases/create-vehicle.use
 import { DeleteVehicleUseCase } from './application/use-cases/delete-vehicle.usecase';
 import { GetVehicleUseCase } from './application/use-cases/get-vehicle.usecase';
 import { UpdateVehicleUseCase } from './application/use-cases/update-vehicle.usecase';
-import { VehicleDomainService } from './domain/services/vehicle-domain.service';
 import { VehicleRepository } from './domain/repositories/vehicle.repository';
 import { PrismaVehicleRepository } from './infra/database/prisma-vehicle.repository';
 import { VehicleController } from './presentation/vehicle.controller';
@@ -13,7 +12,6 @@ import { VehicleController } from './presentation/vehicle.controller';
   controllers: [VehicleController],
   providers: [
     PrismaService,
-    VehicleDomainService,
     CreateVehicleUseCase,
     GetVehicleUseCase,
     UpdateVehicleUseCase,
