@@ -12,14 +12,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Veiculo {
-  id        String   @id @default(uuid())
-  placa     String   @unique
-  chassi    String   @unique
-  renavam   String   @unique
-  modelo    String
-  marca     String
-  ano       Int
+model Vehicle {
+  id                 String   @id @default(uuid())
+  licensePlate       String   @unique
+  chassis            String   @unique
+  registrationNumber String   @unique
+  model              String
+  brand              String
+  year               Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

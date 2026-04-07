@@ -1,8 +1,16 @@
 import { Injectable } from '@nestjs/common';
 
+type HealthResponse = {
+  name: string;
+  version: string;
+};
+
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  getHealth(): HealthResponse {
+    return {
+      name: 'Vehicle API',
+      version: '1.0',
+    };
   }
 }

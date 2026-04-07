@@ -1,48 +1,30 @@
-# UML da tabela Veiculo
+# Vehicle UML
 
 ```mermaid
 classDiagram
-class Veiculo {
+class Vehicle {
   +uuid id
-  +string placa
-  +string chassi
-  +string renavam
-  +string modelo
-  +string marca
-  +int ano
+  +string licensePlate
+  +string chassis
+  +string registrationNumber
+  +string model
+  +string brand
+  +int year
   +DateTime createdAt
   +DateTime updatedAt
 }
 ```
 
-## Regras de negocio
+## Business rules
 
-- `placa` deve ser unica.
-- `chassi` deve ser unico.
-- `renavam` deve ser unico.
-- `ano` deve ser inteiro e estar entre `1900` e `2100`.
-- A tabela e representada no modelo `Veiculo` em `prisma/schema.prisma`.
-# UML - Entidade Veiculo
+- `licensePlate` must be unique.
+- `chassis` must be unique.
+- `registrationNumber` must be unique.
+- `year` must be an integer between `1900` and `2100`.
+- The table is represented by the `Vehicle` model in `prisma/schema.prisma`.
 
-Este diagrama representa a modelagem inicial da tabela `veiculos` no backend.
+## Author
 
-```mermaid
-classDiagram
-  class Veiculo {
-    +UUID id
-    +string placa
-    +string chassi
-    +string renavam
-    +string modelo
-    +string marca
-    +int ano
-  }
-```
-
-## Regras de modelagem recomendadas
-
-- `id` como chave primaria (UUID).
-- `placa` com restricao de unicidade.
-- `chassi` com restricao de unicidade.
-- `renavam` com restricao de unicidade.
-- `ano` com validacao de faixa (exemplo: `>= 1900` e `<= anoAtual + 1`).
+- Name: Jerfson Silva dos Santos
+- LinkedIn: https://www.linkedin.com/in/jerfson-silva/
+- Website: http://jerfsonsilva.com/

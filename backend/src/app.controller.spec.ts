@@ -15,8 +15,11 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return health response', () => {
+      expect(appController.getHealth()).toEqual({
+        name: 'Vehicle API',
+        version: '1.0',
+      });
     });
   });
 });

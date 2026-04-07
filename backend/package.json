@@ -1,8 +1,12 @@
 {
-  "name": "backend",
+  "name": "vehicle-api",
   "version": "0.0.1",
   "description": "",
-  "author": "",
+  "author": {
+    "name": "jerfson silva dos santos",
+    "url": "http://jerfsonsilva.com/"
+  },
+  "homepage": "http://jerfsonsilva.com/",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

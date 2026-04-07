@@ -1,0 +1,133 @@
+{
+  "info": {
+    "_postman_id": "d8f2aa6d-2f9f-48d1-b6c8-9dc4c3be3f6a",
+    "name": "vehicle-api",
+    "description": "Collection com todas as rotas atuais da aplicacao NestJS.\n\nAuthor: Jerfson Silva dos Santos\nLinkedIn: https://www.linkedin.com/in/jerfson-silva/\nWebsite: http://jerfsonsilva.com/",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "vehicleId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health - Hello",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}",
+          "host": [
+            "{{baseUrl}}"
+          ]
+        },
+        "description": "Rota raiz da aplicacao."
+      }
+    },
+    {
+      "name": "Vehicle - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"licensePlate\": \"ABC1D23\",\n  \"chassis\": \"9BWZZZ377VT004251\",\n  \"registrationNumber\": \"12345678901\",\n  \"model\": \"Onix\",\n  \"brand\": \"Chevrolet\",\n  \"year\": 2022\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/vehicles",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehicles"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const json = pm.response.json();",
+              "if (json && json.id) {",
+              "  pm.collectionVariables.set('vehicleId', json.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehicle - Find By Id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/{{vehicleId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehicles",
+            "{{vehicleId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Vehicle - Update",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"model\": \"Onix LT\",\n  \"year\": 2023\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/{{vehicleId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehicles",
+            "{{vehicleId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Vehicle - Delete",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/{{vehicleId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehicles",
+            "{{vehicleId}}"
+          ]
+        }
+      }
+    }
+  ]
+}
