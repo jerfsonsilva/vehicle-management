@@ -1,0 +1,54 @@
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette
+      ),
+      typography: Roboto,
+      density: 0
+    )
+  );
+}
+
+:root {
+  --app-bg: #f5f7fb;
+  --app-surface: #ffffff;
+  --app-text-main: #1d2433;
+  --app-text-muted: #6f7888;
+  --app-border-color: #e3e7ee;
+  --app-radius-lg: 16px;
+  --app-shadow-sm: 0 4px 16px rgb(14 29 61 / 8%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  color-scheme: light;
+  background: radial-gradient(circle at top, #eaf0ff 0%, var(--app-bg) 50%);
+  color: var(--app-text-main);
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+.mat-mdc-card {
+  border-radius: var(--app-radius-lg) !important;
+  box-shadow: var(--app-shadow-sm) !important;
+  border: 1px solid var(--app-border-color);
+  background-color: var(--app-surface) !important;
+}
+
+.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  border-radius: 12px;
+}

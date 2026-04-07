@@ -1,0 +1,28 @@
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.loading {
+  display: grid;
+  place-items: center;
+  min-height: 35vh;
+}
+
+.empty-state {
+  border: 1px dashed var(--app-border-color);
+  border-radius: var(--app-radius-lg);
+  padding: 2rem;
+  text-align: center;
+  color: var(--app-text-muted);
+
+  h3 {
+    margin: 0 0 0.5rem;
+    color: var(--app-text-main);
+  }
+
+  p {
+    margin: 0;
+  }
+}

@@ -1,0 +1,32 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit vehicle' : 'Create vehicle' }}</h2>
+
+<mat-dialog-content>
+  <form class="form-grid" [formGroup]="form">
+    <mat-form-field appearance="outline">
+      <mat-label>Plate</mat-label>
+      <input matInput formControlName="plate" placeholder="ABC1D23" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Brand</mat-label>
+      <input matInput formControlName="brand" placeholder="Toyota" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Model</mat-label>
+      <input matInput formControlName="model" placeholder="Corolla" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Year</mat-label>
+      <input matInput type="number" formControlName="year" placeholder="2024" />
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-flat-button (click)="save()">
+    {{ isEdit ? 'Save changes' : 'Create' }}
+  </button>
+</mat-dialog-actions>

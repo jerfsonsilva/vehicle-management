@@ -1,0 +1,25 @@
+<app-page-shell
+  title="Vehicle Fleet"
+  subtitle="Simple, modern and scalable vehicle management."
+>
+  <section class="toolbar">
+    <button mat-flat-button (click)="openCreateModal()">Create vehicle</button>
+  </section>
+
+  @if (store.loading()) {
+    <section class="loading">
+      <mat-spinner diameter="34" />
+    </section>
+  } @else if (store.loaded() && !store.vehicles().length) {
+    <section class="empty-state">
+      <h3>No vehicles yet</h3>
+      <p>Create your first vehicle to get started.</p>
+    </section>
+  } @else {
+    <app-vehicle-list
+      [vehicles]="store.vehicles()"
+      (edit)="openEditModal($event)"
+      (remove)="confirmDelete($event)"
+    />
+  }
+</app-page-shell>

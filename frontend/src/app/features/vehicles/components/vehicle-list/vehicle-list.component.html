@@ -1,0 +1,19 @@
+<div class="grid">
+  @for (vehicle of vehicles(); track vehicle.id) {
+    <mat-card class="vehicle-card" appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>{{ vehicle.brand }} {{ vehicle.model }}</mat-card-title>
+        <mat-card-subtitle>{{ vehicle.plate }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p><strong>Year:</strong> {{ vehicle.year }}</p>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-button (click)="edit.emit(vehicle)">Edit</button>
+        <button mat-button (click)="remove.emit(vehicle)">Delete</button>
+      </mat-card-actions>
+    </mat-card>
+  }
+</div>
