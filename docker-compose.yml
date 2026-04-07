@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: test-feedz-backend
+    env_file:
+      - ./backend/.env
+    environment:
+      PORT: 3000
+      DATABASE_URL: file:/app/prisma/dev.db
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    volumes:
+      - backend_sqlite_data:/app/prisma
+    restart: unless-stopped
+
+  # Ready for future frontend containerization.
+  # frontend:
+  #   profiles: ["future"]
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "5173:5173"
+  #   depends_on:
+  #     - backend
+
+volumes:
+  backend_sqlite_data:
