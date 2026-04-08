@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import { PrometheusMetricsService } from '../../../../common/observability/prometheus-metrics.service';
 import { ProcessVehicleImportMessageUseCase } from '../../application/use-cases/process-vehicle-import-message.usecase';
 import { SqsVehicleImportConsumerService } from './sqs-vehicle-import-consumer.service';
 
@@ -28,9 +29,14 @@ describe('SqsVehicleImportConsumerService', () => {
     const processMessage = {
       execute: jest.fn().mockResolvedValue(true),
     } as unknown as ProcessVehicleImportMessageUseCase;
+    const metrics = {
+      setWorkerLoopActive: jest.fn(),
+      incrementImportMessageConsumed: jest.fn(),
+    } as unknown as PrometheusMetricsService;
     const service = new SqsVehicleImportConsumerService(
       makeConfig(),
       processMessage,
+      metrics,
     );
     const send = jest.fn().mockResolvedValue({});
     const sleep = jest.fn().mockResolvedValue(undefined);

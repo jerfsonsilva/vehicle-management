@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Transport } from '@nestjs/microservices';
+import { ObservabilityModule } from '../common/observability/observability.module';
 import { PrismaModule } from '../common/prisma/prisma.module';
 import { CreateVehicleUseCase } from '../modules/vehicle/application/use-cases/create-vehicle.usecase';
 import { ProcessVehicleImportMessageUseCase } from '../modules/vehicle/application/use-cases/process-vehicle-import-message.usecase';
@@ -12,7 +13,11 @@ import { SqsVehicleImportConsumerService } from '../modules/vehicle/infra/sqs/sq
 import { WorkerTcpController } from './worker-tcp.controller';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    ObservabilityModule,
+    PrismaModule,
+  ],
   controllers: [WorkerTcpController],
   providers: [
     CreateVehicleUseCase,

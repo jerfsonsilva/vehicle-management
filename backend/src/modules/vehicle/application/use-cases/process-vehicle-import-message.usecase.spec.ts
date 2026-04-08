@@ -1,4 +1,5 @@
 import { VehicleImportStatRepository } from '../../domain/repositories/vehicle-import-stat.repository';
+import { MetricsMonitor } from '../../../../common/observability/domain/metrics-monitor';
 import { CreateVehicleUseCase } from './create-vehicle.usecase';
 import { ProcessVehicleImportMessageUseCase } from './process-vehicle-import-message.usecase';
 
@@ -6,6 +7,7 @@ describe('ProcessVehicleImportMessageUseCase', () => {
   let useCase: ProcessVehicleImportMessageUseCase;
   let createVehicle: jest.Mocked<CreateVehicleUseCase>;
   let statsRepository: jest.Mocked<VehicleImportStatRepository>;
+  let metrics: jest.Mocked<MetricsMonitor>;
 
   beforeEach(() => {
     createVehicle = {
@@ -16,9 +18,14 @@ describe('ProcessVehicleImportMessageUseCase', () => {
       incrementSuccessForUtcDay: jest.fn(),
       incrementFailureForUtcDay: jest.fn(),
     };
+    metrics = {
+      incrementImportMessageProcessed: jest.fn(),
+      observeImportMessageProcessingDuration: jest.fn(),
+    } as unknown as jest.Mocked<MetricsMonitor>;
     useCase = new ProcessVehicleImportMessageUseCase(
       createVehicle,
       statsRepository,
+      metrics,
     );
   });
 

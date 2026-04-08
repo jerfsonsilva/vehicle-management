@@ -47,7 +47,9 @@ export class VehiclesPage implements OnInit, OnDestroy {
   private readonly snackBar = inject(MatSnackBar);
   private importStatusSubscription: Subscription | null = null;
   private pollStartTimeoutId: ReturnType<typeof setTimeout> | null = null;
-  private allowImportCompletion = false;
+  private uploadCompleted = false;
+  private importFlowFinished = false;
+  private pendingTerminalStatus: ImportStatusResponse | null = null;
 
   ngOnInit(): void {
     this.store.loadVehicles();
@@ -94,13 +96,16 @@ export class VehiclesPage implements OnInit, OnDestroy {
   }
 
   private startCsvImportFlow(file: File) {
+    this.stopImportPolling();
     this.prepareImportUiState();
     this.schedulePollingStart();
     this.sendCsvFile(file);
   }
 
   private prepareImportUiState() {
-    this.allowImportCompletion = false;
+    this.uploadCompleted = false;
+    this.importFlowFinished = false;
+    this.pendingTerminalStatus = null;
     this.importPolling.set(true);
     this.importStatus.set({
       status: 'processing',
@@ -123,36 +128,62 @@ export class VehiclesPage implements OnInit, OnDestroy {
   private sendCsvFile(file: File) {
     this.vehicleService.uploadCsv(file).subscribe({
       next: (result: UploadCsvResult) => this.handleUploadSuccess(result),
-      error: () => this.stopImportPolling()
+      error: () => this.finishImportFlow()
     });
   }
 
   private handleUploadSuccess(result: UploadCsvResult) {
-    this.allowImportCompletion = true;
+    this.uploadCompleted = true;
     this.snackBar.open(
       `Importação iniciada. Enfileirados: ${result.queuedCount}. Rejeitados: ${result.rejectedRowCount}.`,
       'Fechar',
       { duration: 3500 }
     );
+    if (this.pendingTerminalStatus) {
+      this.finishImportFlow(this.pendingTerminalStatus);
+    }
   }
 
   private startImportPolling() {
-    this.stopImportPolling();
+    this.importStatusSubscription?.unsubscribe();
+    this.importStatusSubscription = null;
     this.importPolling.set(true);
     this.importStatusSubscription = this.vehicleService.pollImportStatus().subscribe({
       next: (status) => {
         this.importStatus.set(status);
-        const shouldStop =
-          this.allowImportCompletion && status.status !== 'processing';
-        if (shouldStop) {
-          this.importPolling.set(false);
-          this.store.loadVehicles();
+
+        if (status.status === 'processing') {
+          return;
         }
+
+        if (status.status === 'completed') {
+          this.finishImportFlow(status);
+          return;
+        }
+
+        if (this.uploadCompleted) {
+          this.finishImportFlow(status);
+          return;
+        }
+
+        this.pendingTerminalStatus = status;
       },
       error: () => {
-        this.importPolling.set(false);
+        this.finishImportFlow();
       }
     });
+  }
+
+  private finishImportFlow(status?: ImportStatusResponse) {
+    if (status) {
+      this.importStatus.set(status);
+    }
+    if (this.importFlowFinished) {
+      return;
+    }
+    this.importFlowFinished = true;
+    this.stopImportPolling();
+    this.store.loadVehicles();
   }
 
   private stopImportPolling() {
@@ -163,7 +194,7 @@ export class VehiclesPage implements OnInit, OnDestroy {
     this.importStatusSubscription?.unsubscribe();
     this.importStatusSubscription = null;
     this.importPolling.set(false);
-    this.allowImportCompletion = false;
+    this.uploadCompleted = false;
   }
 
   openEditModal(vehicle: Vehicle) {

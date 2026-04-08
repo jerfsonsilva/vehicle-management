@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { timer } from 'rxjs';
-import { switchMap, takeWhile } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
 import { Vehicle, VehiclePayload } from '../../../shared/models/vehicle.model';
 
@@ -67,9 +67,6 @@ export class VehicleService {
   }
 
   pollImportStatus(date?: string, intervalMs = 3000) {
-    return timer(0, intervalMs).pipe(
-      switchMap(() => this.getImportStatus(date)),
-      takeWhile((response) => response.status === 'processing', true)
-    );
+    return timer(0, intervalMs).pipe(switchMap(() => this.getImportStatus(date)));
   }
 }

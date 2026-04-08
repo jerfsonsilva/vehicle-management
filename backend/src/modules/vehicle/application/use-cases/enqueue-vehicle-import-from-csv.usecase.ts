@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
-import { VehicleImportQueue } from '../../domain/ports/vehicle-import.queue';
+import { MetricsMonitor } from '../../../../common/observability/domain/metrics-monitor';
+import { VehicleImportQueue } from '../../domain/contracts/vehicle-import.queue';
 import { rowToVehicleImportPayload } from '../validators/vehicle-import-row.validator';
 
 export type EnqueueVehicleImportFromCsvResult = {
@@ -18,9 +19,13 @@ export class EnqueueVehicleImportFromCsvUseCase {
   private static readonly ENQUEUE_BATCH_SIZE = 20;
   private readonly logger = new Logger(EnqueueVehicleImportFromCsvUseCase.name);
 
-  constructor(private readonly importQueue: VehicleImportQueue) {}
+  constructor(
+    private readonly importQueue: VehicleImportQueue,
+    private readonly metrics: MetricsMonitor,
+  ) {}
 
   async execute(csvBuffer: Buffer): Promise<EnqueueVehicleImportFromCsvResult> {
+    const startedAt = process.hrtime.bigint();
     this.logger.log('Starting CSV import enqueue');
     const text = csvBuffer.toString('utf8');
     const parsed = parse(text, {
@@ -37,6 +42,7 @@ export class EnqueueVehicleImportFromCsvUseCase {
       },
     });
     const records = Array.isArray(parsed) ? parsed : [];
+    this.metrics.incrementCsvRowsReceived(records.length);
     this.logger.log(`Parsed CSV rows=${records.length}`);
 
     let queuedCount = 0;
@@ -64,6 +70,8 @@ export class EnqueueVehicleImportFromCsvUseCase {
     this.logger.log(
       `CSV enqueue finished queued=${queuedCount} rejected=${rejectedRowCount}`,
     );
+    const elapsedNs = Number(process.hrtime.bigint() - startedAt);
+    this.metrics.observeCsvParseDuration(elapsedNs / 1_000_000_000);
     return { queuedCount, rejectedRowCount };
   }
 
@@ -75,8 +83,10 @@ export class EnqueueVehicleImportFromCsvUseCase {
     for (const result of results) {
       if (result === EnqueueRowStatus.Queued) {
         queuedCount += 1;
+        this.metrics.incrementCsvRowsQueued();
       } else {
         rejectedRowCount += 1;
+        this.metrics.incrementCsvRowsRejected();
       }
     }
     return { queuedCount, rejectedRowCount };

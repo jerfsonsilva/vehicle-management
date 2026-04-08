@@ -1,5 +1,6 @@
-import { VehicleImportQueueMonitor } from '../../domain/ports/vehicle-import-queue-monitor';
+import { VehicleImportQueueMonitor } from '../../domain/contracts/vehicle-import-queue-monitor';
 import { VehicleImportStatRepository } from '../../domain/repositories/vehicle-import-stat.repository';
+import { MetricsMonitor } from '../../../../common/observability/domain/metrics-monitor';
 import {
   GetVehicleImportDailyStatusUseCase,
   VehicleImportStatus,
@@ -9,6 +10,7 @@ describe('GetVehicleImportDailyStatusUseCase', () => {
   let useCase: GetVehicleImportDailyStatusUseCase;
   let statRepository: jest.Mocked<VehicleImportStatRepository>;
   let queueMonitor: jest.Mocked<VehicleImportQueueMonitor>;
+  let metrics: jest.Mocked<MetricsMonitor>;
 
   beforeEach(() => {
     statRepository = {
@@ -19,9 +21,13 @@ describe('GetVehicleImportDailyStatusUseCase', () => {
     queueMonitor = {
       getRuntimeStatus: jest.fn(),
     } as unknown as jest.Mocked<VehicleImportQueueMonitor>;
+    metrics = {
+      observeImportStatus: jest.fn(),
+    } as unknown as jest.Mocked<MetricsMonitor>;
     useCase = new GetVehicleImportDailyStatusUseCase(
       statRepository,
       queueMonitor,
+      metrics,
     );
   });
 

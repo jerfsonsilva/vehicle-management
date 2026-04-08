@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { MetricsMonitor } from '../../../../common/observability/domain/metrics-monitor';
 import {
   VehicleImportQueue,
   VehicleImportQueuePayload,
-} from '../../domain/ports/vehicle-import.queue';
+} from '../../domain/contracts/vehicle-import.queue';
 import { EnqueueVehicleImportFromCsvUseCase } from './enqueue-vehicle-import-from-csv.usecase';
 
 describe('EnqueueVehicleImportFromCsvUseCase', () => {
@@ -19,11 +20,28 @@ describe('EnqueueVehicleImportFromCsvUseCase', () => {
     const mockQueue: VehicleImportQueue = {
       enqueue: mockEnqueue,
     };
+    const mockMetrics: jest.Mocked<MetricsMonitor> = {
+      getContentType: jest.fn(),
+      getMetrics: jest.fn(),
+      observeHttpRequest: jest.fn(),
+      incrementCsvRowsReceived: jest.fn(),
+      incrementCsvRowsQueued: jest.fn(),
+      incrementCsvRowsRejected: jest.fn(),
+      observeCsvParseDuration: jest.fn(),
+      incrementImportMessageConsumed: jest.fn(),
+      incrementImportMessageProcessed: jest.fn(),
+      observeImportMessageProcessingDuration: jest.fn(),
+      setQueueRuntimeStatus: jest.fn(),
+      incrementQueueMonitorError: jest.fn(),
+      setWorkerLoopActive: jest.fn(),
+      observeImportStatus: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EnqueueVehicleImportFromCsvUseCase,
         { provide: VehicleImportQueue, useValue: mockQueue },
+        { provide: MetricsMonitor, useValue: mockMetrics },
       ],
     }).compile();
 

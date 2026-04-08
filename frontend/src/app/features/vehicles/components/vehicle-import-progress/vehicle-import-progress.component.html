@@ -11,7 +11,7 @@
       <p><strong>Dia:</strong> {{ data()?.day ?? '-' }}</p>
       <p><strong>Sucesso:</strong> {{ data()?.successCount ?? 0 }}</p>
       <p><strong>Falha:</strong> {{ data()?.failureCount ?? 0 }}</p>
-      @if (polling()) {
+      @if (polling() && (data()?.status ?? 'processing') === 'processing') {
         <div class="loading-line"></div>
         <p class="polling">Processando arquivo e atualizando progresso...</p>
       }

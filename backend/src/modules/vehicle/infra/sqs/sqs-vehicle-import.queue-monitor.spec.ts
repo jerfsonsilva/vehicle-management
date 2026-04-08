@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import { PrometheusMetricsService } from '../../../../common/observability/prometheus-metrics.service';
 import { SqsVehicleImportQueueMonitor } from './sqs-vehicle-import.queue-monitor';
 
 describe('SqsVehicleImportQueueMonitor', () => {
@@ -24,7 +25,11 @@ describe('SqsVehicleImportQueueMonitor', () => {
   }
 
   it('returns parsed visible and in-flight counts', async () => {
-    const monitor = new SqsVehicleImportQueueMonitor(makeConfig());
+    const metrics = {
+      setQueueRuntimeStatus: jest.fn(),
+      incrementQueueMonitorError: jest.fn(),
+    } as unknown as PrometheusMetricsService;
+    const monitor = new SqsVehicleImportQueueMonitor(makeConfig(), metrics);
     const send = jest.fn().mockResolvedValue({
       Attributes: {
         ApproximateNumberOfMessages: '3',
@@ -39,7 +44,11 @@ describe('SqsVehicleImportQueueMonitor', () => {
   });
 
   it('falls back to zero for missing or invalid attributes', async () => {
-    const monitor = new SqsVehicleImportQueueMonitor(makeConfig());
+    const metrics = {
+      setQueueRuntimeStatus: jest.fn(),
+      incrementQueueMonitorError: jest.fn(),
+    } as unknown as PrometheusMetricsService;
+    const monitor = new SqsVehicleImportQueueMonitor(makeConfig(), metrics);
     const send = jest.fn().mockResolvedValue({
       Attributes: {
         ApproximateNumberOfMessages: 'x',

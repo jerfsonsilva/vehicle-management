@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   VehicleImportQueue,
   VehicleImportQueuePayload,
-} from '../../domain/ports/vehicle-import.queue';
+} from '../../domain/contracts/vehicle-import.queue';
 
 @Injectable()
 export class SqsVehicleImportQueue extends VehicleImportQueue {

@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { MetricsMonitor } from '../../../../common/observability/domain/metrics-monitor';
 import { CreateVehicleCommand } from '../commands/create-vehicle.command';
 import { rowToVehicleImportPayload } from '../validators/vehicle-import-row.validator';
 import { VehicleImportStatRepository } from '../../domain/repositories/vehicle-import-stat.repository';
@@ -11,11 +12,14 @@ export class ProcessVehicleImportMessageUseCase {
   constructor(
     private readonly createVehicle: CreateVehicleUseCase,
     private readonly importStats: VehicleImportStatRepository,
+    private readonly metrics: MetricsMonitor,
   ) {}
 
   async execute(rawBody: string, now: Date): Promise<boolean> {
+    const startedAt = process.hrtime.bigint();
     this.logger.log('Processing import message');
     let success = false;
+    let failureReason = 'none';
 
     try {
       const raw = JSON.parse(rawBody) as unknown;
@@ -41,6 +45,8 @@ export class ProcessVehicleImportMessageUseCase {
       success = true;
       this.logger.log('Import message processed successfully');
     } catch (err) {
+      failureReason =
+        err instanceof Error && err.name ? err.name : 'processing_error';
       this.logger.warn(
         `Import message failed: ${err instanceof Error ? err.message : err}`,
       );
@@ -60,6 +66,12 @@ export class ProcessVehicleImportMessageUseCase {
         statErr instanceof Error ? statErr.stack : statErr,
       );
     }
+
+    this.metrics.incrementImportMessageProcessed(success, failureReason);
+    const elapsedNs = Number(process.hrtime.bigint() - startedAt);
+    this.metrics.observeImportMessageProcessingDuration(
+      elapsedNs / 1_000_000_000,
+    );
 
     return success;
   }

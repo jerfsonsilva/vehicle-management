@@ -12,6 +12,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PrometheusMetricsService } from '../../../../common/observability/prometheus-metrics.service';
 import { ProcessVehicleImportMessageUseCase } from '../../application/use-cases/process-vehicle-import-message.usecase';
 
 const POLL_CONFIG = {
@@ -36,6 +37,7 @@ export class SqsVehicleImportConsumerService
   constructor(
     private readonly config: ConfigService,
     private readonly processMessage: ProcessVehicleImportMessageUseCase,
+    private readonly metrics: PrometheusMetricsService,
   ) {
     const region = this.config.getOrThrow<string>('AWS_REGION');
     const endpoint = this.config.get<string>('SQS_ENDPOINT');
@@ -54,11 +56,13 @@ export class SqsVehicleImportConsumerService
   }
 
   onModuleInit(): void {
+    this.metrics.setWorkerLoopActive(true);
     this.loopPromise = this.start();
   }
 
   onModuleDestroy(): void {
     this.stopped = true;
+    this.metrics.setWorkerLoopActive(false);
   }
 
   private async start(): Promise<void> {
@@ -103,6 +107,7 @@ export class SqsVehicleImportConsumerService
       if (!msg.Body || !msg.ReceiptHandle) {
         continue;
       }
+      this.metrics.incrementImportMessageConsumed();
       await this.handleOne(msg.Body, msg.ReceiptHandle);
     }
   }

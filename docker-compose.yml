@@ -24,6 +24,8 @@ services:
       - ./backend/.env
     environment:
       PORT: 3000
+      OBS_SERVICE_NAME: vehicle-api
+      OBS_APP_NAME: test-feedz
       DATABASE_URL: file:/app/data/dev.db
       NODE_ENV: production
       AWS_REGION: us-east-1
@@ -50,6 +52,8 @@ services:
     env_file:
       - ./backend/.env
     environment:
+      OBS_SERVICE_NAME: vehicle-worker
+      OBS_APP_NAME: test-feedz
       DATABASE_URL: file:/app/data/dev.db
       NODE_ENV: production
       AWS_REGION: us-east-1
@@ -58,8 +62,10 @@ services:
       SQS_ENDPOINT: http://localstack:4566
       SQS_IMPORT_QUEUE_URL: http://localstack:4566/000000000000/vehicle-import-queue
       IMPORT_WORKER_TCP_PORT: "39999"
+      IMPORT_WORKER_METRICS_PORT: "9100"
     ports:
       - "39999:39999"
+      - "9100:9100"
     volumes:
       - backend_sqlite_data:/app/data
     depends_on:
@@ -80,5 +86,36 @@ services:
       - backend
     restart: unless-stopped
 
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: test-feedz-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      - backend
+      - backend-worker
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.2.0
+    container_name: test-feedz-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
 volumes:
   backend_sqlite_data:
+  prometheus_data:
+  grafana_data:

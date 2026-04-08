@@ -1,4 +1,4 @@
-import { VehicleImportQueuePayload } from '../../domain/ports/vehicle-import.queue';
+import { VehicleImportQueuePayload } from '../../domain/contracts/vehicle-import.queue';
 import {
   VEHICLE_CHASSIS_LENGTH,
   VEHICLE_LICENSE_PLATE_REGEX,

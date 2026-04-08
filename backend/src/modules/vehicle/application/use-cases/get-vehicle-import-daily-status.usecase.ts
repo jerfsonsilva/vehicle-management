@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { VehicleImportQueueMonitor } from '../../domain/ports/vehicle-import-queue-monitor';
+import { MetricsMonitor } from '../../../../common/observability/domain/metrics-monitor';
+import { VehicleImportQueueMonitor } from '../../domain/contracts/vehicle-import-queue-monitor';
 import { VehicleImportStatRepository } from '../../domain/repositories/vehicle-import-stat.repository';
 import { startOfUtcDay } from '../../domain/utils/utc-day.util';
 
@@ -23,9 +24,11 @@ export class GetVehicleImportDailyStatusUseCase {
   constructor(
     private readonly statRepository: VehicleImportStatRepository,
     private readonly queueMonitor: VehicleImportQueueMonitor,
+    private readonly metrics: MetricsMonitor,
   ) {}
 
   async execute(dateInput?: string): Promise<VehicleImportDailyStatusResult> {
+    const startedAt = process.hrtime.bigint();
     this.logger.log(
       `Fetching import daily status dateInput=${dateInput ?? 'today'}`,
     );
@@ -51,6 +54,8 @@ export class GetVehicleImportDailyStatusUseCase {
     this.logger.log(
       `Import daily status day=${normalized.toISOString().slice(0, 10)} status=${status} success=${snapshot?.successCount ?? 0} failure=${snapshot?.failureCount ?? 0} visible=${runtimeStatus.visible} inFlight=${runtimeStatus.inFlight}`,
     );
+    const elapsedNs = Number(process.hrtime.bigint() - startedAt);
+    this.metrics.observeImportStatus(status, elapsedNs / 1_000_000_000);
 
     return {
       successCount: snapshot?.successCount ?? 0,
