@@ -35,7 +35,7 @@ services:
       SQS_IMPORT_QUEUE_URL: http://localstack:4566/000000000000/vehicle-import-queue
     ports:
       - "3000:3000"
-    command: ["sh", "-c", "npx prisma migrate deploy || npx prisma db push; node dist/main"]
+    command: ["sh", "-c", "npx prisma db push && node dist/main"]
     volumes:
       - backend_sqlite_data:/app/data
     depends_on:
@@ -48,7 +48,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: test-feedz-backend-worker
-    command: ["sh", "-c", "npx prisma migrate deploy || npx prisma db push; node dist/main.worker.js"]
+    command: ["sh", "-c", "npx prisma db push && node dist/main.worker.js"]
     env_file:
       - ./backend/.env
     environment:
