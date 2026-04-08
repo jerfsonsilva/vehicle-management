@@ -72,19 +72,25 @@ Referencia oficial dos comandos: [`DOCKER-COMMANDS.md`](DOCKER-COMMANDS.md).
 docker compose build
 ```
 
-2) Subir todos os servicos:
+2) Copiar arquivo de ambiente do backend:
+
+```bash
+copy backend\.env.example backend\.env
+```
+
+3) Subir todos os servicos:
 
 ```bash
 docker compose up -d
 ```
 
-3) Conferir estado dos containers:
+4) Conferir estado dos containers:
 
 ```bash
 docker compose ps
 ```
 
-4) Conferir logs (se necessario):
+5) Conferir logs (se necessario):
 
 ```bash
 docker compose logs -f backend
@@ -92,7 +98,7 @@ docker compose logs -f backend-worker
 docker compose logs -f localstack
 ```
 
-5) Smoke tests rapidos:
+6) Smoke tests rapidos:
 
 ```bash
 curl http://localhost:3000/api/v1
