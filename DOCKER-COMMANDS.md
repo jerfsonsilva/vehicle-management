@@ -1,17 +1,17 @@
 # Docker Compose Commands
 
-Comandos para rodar o backend com Docker Compose.
+Comandos para rodar backend, frontend e LocalStack (SQS) com Docker Compose.
 
-## Build da imagem
+## Build das imagens
 
 ```bash
-docker compose build backend
+docker compose build
 ```
 
-## Subir o backend
+## Subir todos os servicos
 
 ```bash
-docker compose up -d backend
+docker compose up -d
 ```
 
 ## Ver containers em execucao
@@ -20,10 +20,22 @@ docker compose up -d backend
 docker compose ps
 ```
 
-## Ver logs do backend
+## Ver logs da API HTTP
 
 ```bash
-docker compose logs -f backend
+docker compose logs -f backend-api
+```
+
+## Ver logs do worker (importacao SQS)
+
+```bash
+docker compose logs -f backend-worker
+```
+
+## Ver logs do LocalStack (SQS)
+
+```bash
+docker compose logs -f localstack
 ```
 
 ## Smoke test (exemplo)

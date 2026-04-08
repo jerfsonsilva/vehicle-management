@@ -39,7 +39,9 @@ export class PrismaVehicleRepository implements VehicleRepository {
           year: vehicle.year,
         },
       });
-      return VehicleEntityFactory.fromPersistence(saved as VehiclePersistenceRow);
+      return VehicleEntityFactory.fromPersistence(
+        saved as VehiclePersistenceRow,
+      );
     } catch (error) {
       PrismaErrorUtil.throwIfUniqueViolation(error);
       throw error;
@@ -79,7 +81,9 @@ export class PrismaVehicleRepository implements VehicleRepository {
           year: vehicle.year,
         },
       });
-      return VehicleEntityFactory.fromPersistence(saved as VehiclePersistenceRow);
+      return VehicleEntityFactory.fromPersistence(
+        saved as VehiclePersistenceRow,
+      );
     } catch (error) {
       PrismaErrorUtil.throwIfNotFound(error, 'Vehicle');
       PrismaErrorUtil.throwIfUniqueViolation(error);

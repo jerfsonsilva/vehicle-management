@@ -7,23 +7,30 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import {
+  VEHICLE_CHASSIS_LENGTH,
+  VEHICLE_LICENSE_PLATE_REGEX,
+  VEHICLE_REGISTRATION_NUMBER_REGEX,
+  VEHICLE_YEAR_MAX,
+  VEHICLE_YEAR_MIN,
+} from '../../domain/constants/vehicle-field-patterns';
 
 export class CreateVehicleDto {
   @IsString()
   @IsNotEmpty()
-  @Matches(/^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/i, {
+  @Matches(VEHICLE_LICENSE_PLATE_REGEX, {
     message: 'licensePlate must be in a valid format',
   })
   licensePlate: string;
 
   @IsString()
   @IsNotEmpty()
-  @Length(17, 17)
+  @Length(VEHICLE_CHASSIS_LENGTH, VEHICLE_CHASSIS_LENGTH)
   chassis: string;
 
   @IsString()
   @IsNotEmpty()
-  @Matches(/^[0-9]{11}$/, {
+  @Matches(VEHICLE_REGISTRATION_NUMBER_REGEX, {
     message: 'registrationNumber must have 11 digits',
   })
   registrationNumber: string;
@@ -37,7 +44,7 @@ export class CreateVehicleDto {
   brand: string;
 
   @IsInt()
-  @Min(1900)
-  @Max(2100)
+  @Min(VEHICLE_YEAR_MIN)
+  @Max(VEHICLE_YEAR_MAX)
   year: number;
 }

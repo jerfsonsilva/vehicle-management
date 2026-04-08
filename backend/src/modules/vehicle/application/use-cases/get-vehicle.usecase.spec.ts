@@ -1,4 +1,7 @@
-import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { GetVehicleUseCase } from './get-vehicle.usecase';
 import { VehicleRepository } from '../../domain/repositories/vehicle.repository';
 import { VehicleEntity } from '../../domain/entities/vehicle.entity';
@@ -40,16 +43,16 @@ describe('GetVehicleUseCase', () => {
   it('should throw not found when vehicle does not exist', async () => {
     repository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new GetVehicleQuery('id-404'))).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(
+      useCase.execute(new GetVehicleQuery('id-404')),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('should throw internal server error on unexpected failure', async () => {
     repository.findById.mockRejectedValue(new Error('db down'));
 
-    await expect(useCase.execute(new GetVehicleQuery('id-1'))).rejects.toBeInstanceOf(
-      InternalServerErrorException,
-    );
+    await expect(
+      useCase.execute(new GetVehicleQuery('id-1')),
+    ).rejects.toBeInstanceOf(InternalServerErrorException);
   });
 });

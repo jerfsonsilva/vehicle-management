@@ -13,6 +13,10 @@
     {
       "key": "vehicleId",
       "value": ""
+    },
+    {
+      "key": "importDate",
+      "value": ""
     }
   ],
   "item": [
@@ -68,6 +72,62 @@
           }
         }
       ]
+    },
+    {
+      "name": "Vehicle - Import CSV",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "description": "CSV: licensePlate,chassis,registrationNumber,model,brand,year. Amostra: backend/docs/samples/vehicles-import-sample.csv",
+              "type": "file",
+              "src": []
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/import/csv",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehicles",
+            "import",
+            "csv"
+          ]
+        },
+        "description": "Envia cada linha valida como uma mensagem SQS. Resposta: queuedCount, rejectedRowCount."
+      }
+    },
+    {
+      "name": "Vehicle - Import status (dia UTC)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/import/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehicles",
+            "import",
+            "status"
+          ],
+          "query": [
+            {
+              "key": "date",
+              "value": "{{importDate}}",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "Agregado do dia UTC: successCount, failureCount, day. Opcional: ative query date=YYYY-MM-DD e defina importDate."
+      }
     },
     {
       "name": "Vehicle - Find By Id",

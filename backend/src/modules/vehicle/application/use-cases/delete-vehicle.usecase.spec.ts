@@ -1,4 +1,7 @@
-import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { DeleteVehicleUseCase } from './delete-vehicle.usecase';
 import { VehicleRepository } from '../../domain/repositories/vehicle.repository';
 
@@ -26,9 +29,13 @@ describe('DeleteVehicleUseCase', () => {
   });
 
   it('should preserve not found exception', async () => {
-    repository.delete.mockRejectedValue(new NotFoundException('Vehicle not found'));
+    repository.delete.mockRejectedValue(
+      new NotFoundException('Vehicle not found'),
+    );
 
-    await expect(useCase.execute('id-404')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(useCase.execute('id-404')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('should throw internal server error on unexpected failure', async () => {

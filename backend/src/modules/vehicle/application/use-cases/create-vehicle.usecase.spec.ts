@@ -1,4 +1,7 @@
-import { ConflictException, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateVehicleUseCase } from './create-vehicle.usecase';
 import { VehicleRepository } from '../../domain/repositories/vehicle.repository';
 import { VehicleEntity } from '../../domain/entities/vehicle.entity';
@@ -70,7 +73,9 @@ describe('CreateVehicleUseCase', () => {
   });
 
   it('should preserve conflict exception for duplicated data', async () => {
-    repository.create.mockRejectedValue(new ConflictException('Duplicate value'));
+    repository.create.mockRejectedValue(
+      new ConflictException('Duplicate value'),
+    );
 
     await expect(
       useCase.execute({

@@ -45,6 +45,8 @@ describe('PrismaErrorUtil', () => {
 
   it('should not throw for non P2025', () => {
     const error = new Error('other');
-    expect(() => PrismaErrorUtil.throwIfNotFound(error, 'Vehicle')).not.toThrow();
+    expect(() =>
+      PrismaErrorUtil.throwIfNotFound(error, 'Vehicle'),
+    ).not.toThrow();
   });
 });

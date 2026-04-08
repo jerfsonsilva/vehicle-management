@@ -1,4 +1,7 @@
-import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { UpdateVehicleUseCase } from './update-vehicle.usecase';
 import { VehicleRepository } from '../../domain/repositories/vehicle.repository';
 import { VehicleEntity } from '../../domain/entities/vehicle.entity';
@@ -40,7 +43,11 @@ describe('UpdateVehicleUseCase', () => {
     repository.findById.mockResolvedValue(current);
     repository.update.mockResolvedValue(updated);
 
-    const result = await useCase.execute({ id: 'id-1', model: 'Onix LT', year: 2023 });
+    const result = await useCase.execute({
+      id: 'id-1',
+      model: 'Onix LT',
+      year: 2023,
+    });
 
     expect(repository.findById).toHaveBeenCalledWith('id-1');
     expect(repository.update).toHaveBeenCalledWith(

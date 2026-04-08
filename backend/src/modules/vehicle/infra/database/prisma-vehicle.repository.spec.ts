@@ -26,7 +26,9 @@ describe('PrismaVehicleRepository', () => {
         delete: jest.fn(),
       },
     };
-    repository = new PrismaVehicleRepository(prismaMock as unknown as PrismaService);
+    repository = new PrismaVehicleRepository(
+      prismaMock as unknown as PrismaService,
+    );
   });
 
   it('should create and map vehicle entity', async () => {
@@ -212,7 +214,9 @@ describe('PrismaVehicleRepository', () => {
       }),
     );
 
-    await expect(repository.delete('id-404')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(repository.delete('id-404')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('should rethrow unknown delete error', async () => {

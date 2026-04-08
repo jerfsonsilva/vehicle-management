@@ -26,8 +26,7 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 COPY .env.example ./.env
 
-RUN npx prisma db push
-
 EXPOSE 3000
+EXPOSE 39999
 
 CMD ["sh", "-c", "node dist/main"]
