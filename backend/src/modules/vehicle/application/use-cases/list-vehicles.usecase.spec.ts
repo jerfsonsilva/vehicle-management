@@ -30,18 +30,26 @@ describe('ListVehiclesUseCase', () => {
         2022,
       ),
     ];
-    repository.findAll.mockResolvedValue(vehicles);
+    repository.findAll.mockResolvedValue({ items: vehicles, total: 1 });
 
-    const result = await useCase.execute();
+    const result = await useCase.execute({ page: 1, pageSize: 10 });
 
-    expect(repository.findAll).toHaveBeenCalledTimes(1);
-    expect(result).toEqual(vehicles);
+    expect(repository.findAll).toHaveBeenCalledWith({ page: 1, pageSize: 10 });
+    expect(result).toEqual({
+      items: vehicles,
+      page: 1,
+      pageSize: 10,
+      total: 1,
+      totalPages: 1,
+    });
   });
 
   it('should throw internal server error on unexpected failure', async () => {
     repository.findAll.mockRejectedValue(new Error('db down'));
 
-    await expect(useCase.execute()).rejects.toBeInstanceOf(
+    await expect(
+      useCase.execute({ page: 1, pageSize: 10 }),
+    ).rejects.toBeInstanceOf(
       InternalServerErrorException,
     );
   });

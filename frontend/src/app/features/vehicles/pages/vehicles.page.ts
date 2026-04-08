@@ -1,15 +1,24 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { filter, switchMap } from 'rxjs';
+import { Subscription, filter, switchMap } from 'rxjs';
 import { PageShellComponent } from '../../../shared/ui/page-shell/page-shell.component';
 import { ConfirmDialogComponent } from '../../../shared/ui/confirm-dialog/confirm-dialog.component';
 import { Vehicle, VehiclePayload } from '../../../shared/models/vehicle.model';
+import { VehicleImportProgressComponent } from '../components/vehicle-import-progress/vehicle-import-progress.component';
 import { VehicleFormModalComponent } from '../components/vehicle-form-modal/vehicle-form-modal.component';
+import { VehicleUploadCsvModalComponent } from '../components/vehicle-upload-csv-modal/vehicle-upload-csv-modal.component';
 import { VehicleListComponent } from '../components/vehicle-list/vehicle-list.component';
-import { VehicleService } from '../services/vehicle.service';
+import {
+  ImportStatusResponse,
+  UploadCsvResult,
+  VehicleService
+} from '../services/vehicle.service';
 import { VehiclesStore } from '../state/vehicles.store';
 
 @Component({
@@ -17,21 +26,42 @@ import { VehiclesStore } from '../state/vehicles.store';
   imports: [
     PageShellComponent,
     MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
+    VehicleImportProgressComponent,
     VehicleListComponent
   ],
   providers: [VehiclesStore],
   templateUrl: './vehicles.page.html',
   styleUrl: './vehicles.page.scss'
 })
-export class VehiclesPage implements OnInit {
+export class VehiclesPage implements OnInit, OnDestroy {
+  private static readonly IMPORT_POLL_START_DELAY_MS = 3000;
   readonly store = inject(VehiclesStore);
+  readonly importStatus = signal<ImportStatusResponse | null>(null);
+  readonly importPolling = signal(false);
   private readonly vehicleService = inject(VehicleService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private importStatusSubscription: Subscription | null = null;
+  private pollStartTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private allowImportCompletion = false;
 
   ngOnInit(): void {
     this.store.loadVehicles();
+  }
+
+  ngOnDestroy(): void {
+    this.stopImportPolling();
+  }
+
+  setPageSize(value: unknown) {
+    const size = Number(value);
+    if (Number.isFinite(size)) {
+      this.store.setPageSize(size);
+    }
   }
 
   openCreateModal() {
@@ -46,6 +76,94 @@ export class VehiclesPage implements OnInit {
         this.snackBar.open('Veículo cadastrado.', 'Fechar', { duration: 2500 });
         this.store.loadVehicles();
       });
+  }
+
+  openImportCsvModal() {
+    this.dialog
+      .open(VehicleUploadCsvModalComponent, { width: '560px' })
+      .afterClosed()
+      .pipe(filter((file): file is File => !!file))
+      .subscribe({
+        next: (file) => {
+          this.startCsvImportFlow(file);
+        },
+        error: () => {
+          this.stopImportPolling();
+        }
+      });
+  }
+
+  private startCsvImportFlow(file: File) {
+    this.prepareImportUiState();
+    this.schedulePollingStart();
+    this.sendCsvFile(file);
+  }
+
+  private prepareImportUiState() {
+    this.allowImportCompletion = false;
+    this.importPolling.set(true);
+    this.importStatus.set({
+      status: 'processing',
+      successCount: this.importStatus()?.successCount ?? 0,
+      failureCount: this.importStatus()?.failureCount ?? 0,
+      day: this.importStatus()?.day ?? new Date().toISOString().slice(0, 10)
+    });
+  }
+
+  private schedulePollingStart() {
+    if (this.pollStartTimeoutId) {
+      clearTimeout(this.pollStartTimeoutId);
+    }
+    this.pollStartTimeoutId = setTimeout(() => {
+      this.startImportPolling();
+      this.pollStartTimeoutId = null;
+    }, VehiclesPage.IMPORT_POLL_START_DELAY_MS);
+  }
+
+  private sendCsvFile(file: File) {
+    this.vehicleService.uploadCsv(file).subscribe({
+      next: (result: UploadCsvResult) => this.handleUploadSuccess(result),
+      error: () => this.stopImportPolling()
+    });
+  }
+
+  private handleUploadSuccess(result: UploadCsvResult) {
+    this.allowImportCompletion = true;
+    this.snackBar.open(
+      `Importação iniciada. Enfileirados: ${result.queuedCount}. Rejeitados: ${result.rejectedRowCount}.`,
+      'Fechar',
+      { duration: 3500 }
+    );
+  }
+
+  private startImportPolling() {
+    this.stopImportPolling();
+    this.importPolling.set(true);
+    this.importStatusSubscription = this.vehicleService.pollImportStatus().subscribe({
+      next: (status) => {
+        this.importStatus.set(status);
+        const shouldStop =
+          this.allowImportCompletion && status.status !== 'processing';
+        if (shouldStop) {
+          this.importPolling.set(false);
+          this.store.loadVehicles();
+        }
+      },
+      error: () => {
+        this.importPolling.set(false);
+      }
+    });
+  }
+
+  private stopImportPolling() {
+    if (this.pollStartTimeoutId) {
+      clearTimeout(this.pollStartTimeoutId);
+      this.pollStartTimeoutId = null;
+    }
+    this.importStatusSubscription?.unsubscribe();
+    this.importStatusSubscription = null;
+    this.importPolling.set(false);
+    this.allowImportCompletion = false;
   }
 
   openEditModal(vehicle: Vehicle) {

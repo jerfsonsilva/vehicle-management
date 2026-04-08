@@ -10,6 +10,7 @@ describe('PrismaVehicleRepository', () => {
     vehicle: {
       create: jest.Mock;
       findMany: jest.Mock;
+      count: jest.Mock;
       findUnique: jest.Mock;
       update: jest.Mock;
       delete: jest.Mock;
@@ -21,6 +22,7 @@ describe('PrismaVehicleRepository', () => {
       vehicle: {
         create: jest.fn(),
         findMany: jest.fn(),
+        count: jest.fn(),
         findUnique: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
@@ -110,7 +112,7 @@ describe('PrismaVehicleRepository', () => {
     expect(result).toBeNull();
   });
 
-  it('should return mapped list on findAll', async () => {
+  it('should return paginated mapped list on findAll', async () => {
     prismaMock.vehicle.findMany.mockResolvedValue([
       {
         id: 'id-1',
@@ -131,37 +133,46 @@ describe('PrismaVehicleRepository', () => {
         year: 2023,
       },
     ]);
+    prismaMock.vehicle.count.mockResolvedValue(2);
 
-    const result = await repository.findAll();
+    const result = await repository.findAll({ page: 2, pageSize: 10 });
 
     expect(prismaMock.vehicle.findMany).toHaveBeenCalledWith({
       orderBy: { createdAt: 'desc' },
+      skip: 10,
+      take: 10,
     });
-    expect(result).toHaveLength(2);
-    expect(result[0]).toBeInstanceOf(VehicleEntity);
+    expect(prismaMock.vehicle.count).toHaveBeenCalledTimes(1);
+    expect(result.total).toBe(2);
+    expect(result.items).toHaveLength(2);
+    expect(result.items[0]).toBeInstanceOf(VehicleEntity);
   });
 
   it('should return empty list on findAll when no records', async () => {
     prismaMock.vehicle.findMany.mockResolvedValue([]);
+    prismaMock.vehicle.count.mockResolvedValue(0);
 
-    const result = await repository.findAll();
+    const result = await repository.findAll({ page: 1, pageSize: 10 });
 
-    expect(result).toEqual([]);
+    expect(result).toEqual({ items: [], total: 0 });
   });
 
   it('should return empty list on findAll when prisma returns null-ish', async () => {
     prismaMock.vehicle.findMany.mockResolvedValue(null);
+    prismaMock.vehicle.count.mockResolvedValue(0);
 
-    const result = await repository.findAll();
+    const result = await repository.findAll({ page: 1, pageSize: 10 });
 
-    expect(result).toEqual([]);
+    expect(result).toEqual({ items: [], total: 0 });
   });
 
   it('should rethrow unknown findAll error', async () => {
     const unknown = new Error('unknown');
     prismaMock.vehicle.findMany.mockRejectedValue(unknown);
 
-    await expect(repository.findAll()).rejects.toBe(unknown);
+    await expect(
+      repository.findAll({ page: 1, pageSize: 10 }),
+    ).rejects.toBe(unknown);
   });
 
   it('should throw not found on update with missing record (P2025)', async () => {

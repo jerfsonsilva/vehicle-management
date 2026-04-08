@@ -62,11 +62,17 @@ describe('VehicleController', () => {
   });
 
   it('should delegate findAll to ListVehiclesUseCase', async () => {
-    listUseCase.execute.mockResolvedValue([]);
+    listUseCase.execute.mockResolvedValue({
+      items: [],
+      page: 1,
+      pageSize: 10,
+      total: 0,
+      totalPages: 0,
+    });
 
-    await controller.findAll();
+    await controller.findAll({ page: 1, pageSize: 10 });
 
-    expect(listUseCase.execute).toHaveBeenCalledTimes(1);
+    expect(listUseCase.execute).toHaveBeenCalledWith({ page: 1, pageSize: 10 });
   });
 
   it('should delegate update to UpdateVehicleUseCase', async () => {

@@ -1,0 +1,20 @@
+@if (data() || polling()) {
+  <section class="import-progress">
+    <header>
+      <h4>Status da importação</h4>
+      <span class="badge" [attr.data-status]="data()?.status ?? 'processing'">
+        {{ data()?.status ?? 'processing' }}
+      </span>
+    </header>
+
+    <div class="stats">
+      <p><strong>Dia:</strong> {{ data()?.day ?? '-' }}</p>
+      <p><strong>Sucesso:</strong> {{ data()?.successCount ?? 0 }}</p>
+      <p><strong>Falha:</strong> {{ data()?.failureCount ?? 0 }}</p>
+      @if (polling()) {
+        <div class="loading-line"></div>
+        <p class="polling">Processando arquivo e atualizando progresso...</p>
+      }
+    </div>
+  </section>
+}

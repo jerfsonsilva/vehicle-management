@@ -1,0 +1,68 @@
+.import-progress {
+  border: 1px solid var(--app-border-color);
+  border-radius: var(--app-radius-lg);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+h4 {
+  margin: 0;
+}
+
+.badge {
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+
+.badge[data-status='processing'] {
+  color: #ef6c00;
+}
+
+.badge[data-status='completed'] {
+  color: #2e7d32;
+}
+
+.badge[data-status='idle'] {
+  color: #546e7a;
+}
+
+.stats p {
+  margin: 0.2rem 0;
+}
+
+.polling {
+  color: var(--app-text-muted);
+}
+
+.loading-line {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.08) 0%,
+    rgba(0, 0, 0, 0.18) 50%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
+  background-size: 200% 100%;
+  animation: loadingShift 1.2s linear infinite;
+  margin-top: 0.4rem;
+}
+
+@keyframes loadingShift {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

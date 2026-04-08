@@ -1,4 +1,20 @@
 services:
+  localstack:
+    image: localstack/localstack:3.5
+    container_name: test-feedz-localstack
+    environment:
+      SERVICES: sqs
+      DEBUG: "0"
+    ports:
+      - "4566:4566"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    restart: unless-stopped
+
   backend:
     build:
       context: ./backend
@@ -8,12 +24,49 @@ services:
       - ./backend/.env
     environment:
       PORT: 3000
-      DATABASE_URL: file:/app/prisma/dev.db
+      DATABASE_URL: file:/app/data/dev.db
       NODE_ENV: production
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      SQS_ENDPOINT: http://localstack:4566
+      SQS_IMPORT_QUEUE_URL: http://localstack:4566/000000000000/vehicle-import-queue
     ports:
       - "3000:3000"
+    command: ["sh", "-c", "npx prisma migrate deploy || npx prisma db push; node dist/main"]
     volumes:
-      - backend_sqlite_data:/app/prisma
+      - backend_sqlite_data:/app/data
+    depends_on:
+      localstack:
+        condition: service_healthy
+    restart: unless-stopped
+
+  backend-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: test-feedz-backend-worker
+    command: ["sh", "-c", "npx prisma migrate deploy || npx prisma db push; node dist/main.worker.js"]
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: file:/app/data/dev.db
+      NODE_ENV: production
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      SQS_ENDPOINT: http://localstack:4566
+      SQS_IMPORT_QUEUE_URL: http://localstack:4566/000000000000/vehicle-import-queue
+      IMPORT_WORKER_TCP_PORT: "39999"
+    ports:
+      - "39999:39999"
+    volumes:
+      - backend_sqlite_data:/app/data
+    depends_on:
+      localstack:
+        condition: service_healthy
+      backend:
+        condition: service_started
     restart: unless-stopped
 
   frontend:

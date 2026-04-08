@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CreateVehicleCommand } from '../application/commands/create-vehicle.command';
 import { GetVehicleQuery } from '../application/queries/get-vehicle.query';
@@ -18,6 +19,7 @@ import {
 import { GetVehicleUseCase } from '../application/use-cases/get-vehicle.usecase';
 import { ListVehiclesUseCase } from '../application/use-cases/list-vehicles.usecase';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
+import { ListVehiclesQueryDto } from './dto/list-vehicles-query.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 
 @Controller('vehicles')
@@ -49,8 +51,11 @@ export class VehicleController {
   }
 
   @Get()
-  async findAll() {
-    return this.listVehiclesUseCase.execute();
+  async findAll(@Query() query: ListVehiclesQueryDto) {
+    return this.listVehiclesUseCase.execute({
+      page: query.page,
+      pageSize: query.pageSize,
+    });
   }
 
   @Patch(':id')

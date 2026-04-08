@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../common/prisma/prisma.service';
 import { VehicleEntity } from '../../domain/entities/vehicle.entity';
-import { VehicleRepository } from '../../domain/repositories/vehicle.repository';
+import {
+  VehiclePaginatedResult,
+  VehiclePaginationParams,
+  VehicleRepository,
+} from '../../domain/repositories/vehicle.repository';
 import {
   VehicleEntityFactory,
   VehiclePersistenceRow,
@@ -11,6 +15,7 @@ import { PrismaErrorUtil } from '../utils/prisma-error.util';
 type VehicleModelClient = {
   create: (args: unknown) => Promise<unknown>;
   findMany: (args?: unknown) => Promise<unknown>;
+  count: (args?: unknown) => Promise<unknown>;
   findUnique: (args: unknown) => Promise<unknown>;
   update: (args: unknown) => Promise<unknown>;
   delete: (args: unknown) => Promise<unknown>;
@@ -57,15 +62,24 @@ export class PrismaVehicleRepository implements VehicleRepository {
       : null;
   }
 
-  async findAll(): Promise<VehicleEntity[]> {
+  async findAll(params: VehiclePaginationParams): Promise<VehiclePaginatedResult> {
+    const skip = (params.page - 1) * params.pageSize;
     const rowsRaw = await this.vehicleModel.findMany({
       orderBy: { createdAt: 'desc' },
+      skip,
+      take: params.pageSize,
     });
+    const totalRaw = await this.vehicleModel.count();
     const rows = Array.isArray(rowsRaw)
       ? (rowsRaw as VehiclePersistenceRow[])
       : [];
+    const total =
+      typeof totalRaw === 'number' && Number.isFinite(totalRaw) ? totalRaw : 0;
 
-    return rows.map((row) => VehicleEntityFactory.fromPersistence(row));
+    return {
+      items: rows.map((row) => VehicleEntityFactory.fromPersistence(row)),
+      total,
+    };
   }
 
   async update(vehicle: VehicleEntity): Promise<VehicleEntity> {

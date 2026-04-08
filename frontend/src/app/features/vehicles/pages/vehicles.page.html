@@ -4,22 +4,58 @@
 >
   <section class="toolbar">
     <button mat-flat-button (click)="openCreateModal()">Cadastrar veículo</button>
+    <button mat-stroked-button (click)="openImportCsvModal()">Importar CSV</button>
   </section>
 
-  @if (store.loading()) {
-    <section class="loading">
-      <mat-spinner diameter="34" />
+  <app-vehicle-import-progress
+    [data]="importStatus()"
+    [polling]="importPolling()"
+  />
+
+  <section class="pagination-bar">
+    <mat-form-field appearance="outline">
+      <mat-label>Itens por página</mat-label>
+      <mat-select
+        [value]="store.pageSize()"
+        (selectionChange)="setPageSize($event.value)"
+      >
+        @for (size of store.pageSizeOptions; track size) {
+          <mat-option [value]="size">{{ size }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="pagination-controls">
+      <span>Página {{ store.page() }} de {{ store.totalPages() || 1 }}</span>
+      <button mat-icon-button (click)="store.prevPage()" [disabled]="store.page() <= 1">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        (click)="store.nextPage()"
+        [disabled]="store.totalPages() === 0 || store.page() >= store.totalPages()"
+      >
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </section>
+
+  <section class="content-wrapper">
+    @if (!store.loading() && store.loaded() && !store.vehicles().length) {
+      <section class="empty-state">
+        <h3>Nenhum veículo cadastrado</h3>
+        <p>Cadastre seu primeiro veículo para começar.</p>
+      </section>
+    } @else {
+      <app-vehicle-list
+        [vehicles]="store.vehicles()"
+        (edit)="openEditModal($event)"
+        (remove)="confirmDelete($event)"
+      />
+    }
+
+    <section class="loading-overlay" [class.visible]="store.loading()">
+      <mat-spinner diameter="40" />
     </section>
-  } @else if (store.loaded() && !store.vehicles().length) {
-    <section class="empty-state">
-      <h3>Nenhum veículo cadastrado</h3>
-      <p>Cadastre seu primeiro veículo para começar.</p>
-    </section>
-  } @else {
-    <app-vehicle-list
-      [vehicles]="store.vehicles()"
-      (edit)="openEditModal($event)"
-      (remove)="confirmDelete($event)"
-    />
-  }
+  </section>
 </app-page-shell>
