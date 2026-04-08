@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
 import { VehicleImportQueue } from '../../domain/ports/vehicle-import.queue';
 import { rowToVehicleImportPayload } from '../validators/vehicle-import-row.validator';
@@ -16,10 +16,12 @@ enum EnqueueRowStatus {
 @Injectable()
 export class EnqueueVehicleImportFromCsvUseCase {
   private static readonly ENQUEUE_BATCH_SIZE = 20;
+  private readonly logger = new Logger(EnqueueVehicleImportFromCsvUseCase.name);
 
   constructor(private readonly importQueue: VehicleImportQueue) {}
 
   async execute(csvBuffer: Buffer): Promise<EnqueueVehicleImportFromCsvResult> {
+    this.logger.log('Starting CSV import enqueue');
     const text = csvBuffer.toString('utf8');
     const parsed = parse(text, {
       columns: true,
@@ -35,6 +37,7 @@ export class EnqueueVehicleImportFromCsvUseCase {
       },
     });
     const records = Array.isArray(parsed) ? parsed : [];
+    this.logger.log(`Parsed CSV rows=${records.length}`);
 
     let queuedCount = 0;
     let rejectedRowCount = 0;
@@ -58,6 +61,9 @@ export class EnqueueVehicleImportFromCsvUseCase {
       ));
     }
 
+    this.logger.log(
+      `CSV enqueue finished queued=${queuedCount} rejected=${rejectedRowCount}`,
+    );
     return { queuedCount, rejectedRowCount };
   }
 

@@ -14,6 +14,7 @@ export class ProcessVehicleImportMessageUseCase {
   ) {}
 
   async execute(rawBody: string, now: Date): Promise<boolean> {
+    this.logger.log('Processing import message');
     let success = false;
 
     try {
@@ -38,6 +39,7 @@ export class ProcessVehicleImportMessageUseCase {
 
       await this.createVehicle.execute(command);
       success = true;
+      this.logger.log('Import message processed successfully');
     } catch (err) {
       this.logger.warn(
         `Import message failed: ${err instanceof Error ? err.message : err}`,
@@ -47,8 +49,10 @@ export class ProcessVehicleImportMessageUseCase {
     try {
       if (success) {
         await this.importStats.incrementSuccessForUtcDay(now);
+        this.logger.log('Import success stats updated');
       } else {
         await this.importStats.incrementFailureForUtcDay(now);
+        this.logger.log('Import failure stats updated');
       }
     } catch (statErr) {
       this.logger.error(

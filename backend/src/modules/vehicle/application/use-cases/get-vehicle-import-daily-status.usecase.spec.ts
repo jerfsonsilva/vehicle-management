@@ -19,7 +19,10 @@ describe('GetVehicleImportDailyStatusUseCase', () => {
     queueMonitor = {
       getRuntimeStatus: jest.fn(),
     } as unknown as jest.Mocked<VehicleImportQueueMonitor>;
-    useCase = new GetVehicleImportDailyStatusUseCase(statRepository, queueMonitor);
+    useCase = new GetVehicleImportDailyStatusUseCase(
+      statRepository,
+      queueMonitor,
+    );
   });
 
   it('returns processing status when queue has pending or in-flight messages', async () => {
@@ -27,7 +30,10 @@ describe('GetVehicleImportDailyStatusUseCase', () => {
       successCount: 7,
       failureCount: 2,
     });
-    queueMonitor.getRuntimeStatus.mockResolvedValue({ visible: 1, inFlight: 0 });
+    queueMonitor.getRuntimeStatus.mockResolvedValue({
+      visible: 1,
+      inFlight: 0,
+    });
 
     const result = await useCase.execute('2026-04-08');
 
@@ -47,7 +53,10 @@ describe('GetVehicleImportDailyStatusUseCase', () => {
       successCount: 2,
       failureCount: 1,
     });
-    queueMonitor.getRuntimeStatus.mockResolvedValue({ visible: 0, inFlight: 0 });
+    queueMonitor.getRuntimeStatus.mockResolvedValue({
+      visible: 0,
+      inFlight: 0,
+    });
 
     const result = await useCase.execute('2026-04-09');
 
@@ -61,7 +70,10 @@ describe('GetVehicleImportDailyStatusUseCase', () => {
 
   it('returns idle status when no snapshot and queue is empty', async () => {
     statRepository.findByUtcDay.mockResolvedValue(null);
-    queueMonitor.getRuntimeStatus.mockResolvedValue({ visible: 0, inFlight: 0 });
+    queueMonitor.getRuntimeStatus.mockResolvedValue({
+      visible: 0,
+      inFlight: 0,
+    });
 
     const result = await useCase.execute('2026-04-10');
 
@@ -75,7 +87,10 @@ describe('GetVehicleImportDailyStatusUseCase', () => {
 
   it('uses current UTC day when date input is invalid', async () => {
     statRepository.findByUtcDay.mockResolvedValue(null);
-    queueMonitor.getRuntimeStatus.mockResolvedValue({ visible: 0, inFlight: 0 });
+    queueMonitor.getRuntimeStatus.mockResolvedValue({
+      visible: 0,
+      inFlight: 0,
+    });
     const now = new Date('2026-04-10T15:30:00.000Z');
     jest.useFakeTimers().setSystemTime(now.getTime());
     try {

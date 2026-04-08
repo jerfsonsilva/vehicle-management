@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { VehicleImportQueueMonitor } from '../../domain/ports/vehicle-import-queue-monitor';
 import { VehicleImportStatRepository } from '../../domain/repositories/vehicle-import-stat.repository';
 import { startOfUtcDay } from '../../domain/utils/utc-day.util';
@@ -18,12 +18,17 @@ export type VehicleImportDailyStatusResult = {
 
 @Injectable()
 export class GetVehicleImportDailyStatusUseCase {
+  private readonly logger = new Logger(GetVehicleImportDailyStatusUseCase.name);
+
   constructor(
     private readonly statRepository: VehicleImportStatRepository,
     private readonly queueMonitor: VehicleImportQueueMonitor,
   ) {}
 
   async execute(dateInput?: string): Promise<VehicleImportDailyStatusResult> {
+    this.logger.log(
+      `Fetching import daily status dateInput=${dateInput ?? 'today'}`,
+    );
     const day =
       dateInput && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)
         ? new Date(`${dateInput}T00:00:00.000Z`)
@@ -32,19 +37,26 @@ export class GetVehicleImportDailyStatusUseCase {
     const normalized = startOfUtcDay(day);
     const snapshot = await this.statRepository.findByUtcDay(normalized);
     const runtimeStatus = await this.queueMonitor.getRuntimeStatus();
-    const hasMessagesInQueue = runtimeStatus.visible + runtimeStatus.inFlight > 0;
+    const hasMessagesInQueue =
+      runtimeStatus.visible + runtimeStatus.inFlight > 0;
     const hasProcessedMessagesToday =
       (snapshot?.successCount ?? 0) + (snapshot?.failureCount ?? 0) > 0;
+
+    const status = hasMessagesInQueue
+      ? VehicleImportStatus.Processing
+      : hasProcessedMessagesToday
+        ? VehicleImportStatus.Completed
+        : VehicleImportStatus.Idle;
+
+    this.logger.log(
+      `Import daily status day=${normalized.toISOString().slice(0, 10)} status=${status} success=${snapshot?.successCount ?? 0} failure=${snapshot?.failureCount ?? 0} visible=${runtimeStatus.visible} inFlight=${runtimeStatus.inFlight}`,
+    );
 
     return {
       successCount: snapshot?.successCount ?? 0,
       failureCount: snapshot?.failureCount ?? 0,
       day: normalized.toISOString().slice(0, 10),
-      status: hasMessagesInQueue
-        ? VehicleImportStatus.Processing
-        : hasProcessedMessagesToday
-          ? VehicleImportStatus.Completed
-          : VehicleImportStatus.Idle,
+      status,
     };
   }
 }

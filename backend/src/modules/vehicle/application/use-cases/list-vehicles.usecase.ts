@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { VehicleEntity } from '../../domain/entities/vehicle.entity';
 import {
   VehiclePaginatedResult,
@@ -16,12 +20,20 @@ export type ListVehiclesResult = {
 
 @Injectable()
 export class ListVehiclesUseCase {
+  private readonly logger = new Logger(ListVehiclesUseCase.name);
+
   constructor(private readonly vehicleRepository: VehicleRepository) {}
 
   async execute(params: VehiclePaginationParams): Promise<ListVehiclesResult> {
+    this.logger.log(
+      `Listing vehicles page=${params.page} pageSize=${params.pageSize}`,
+    );
     try {
       const result: VehiclePaginatedResult =
         await this.vehicleRepository.findAll(params);
+      this.logger.log(
+        `Vehicle list fetched items=${result.items.length} total=${result.total}`,
+      );
       return {
         items: result.items,
         page: params.page,
@@ -31,6 +43,9 @@ export class ListVehiclesUseCase {
           result.total === 0 ? 0 : Math.ceil(result.total / params.pageSize),
       };
     } catch {
+      this.logger.error(
+        `Vehicle list failed page=${params.page} pageSize=${params.pageSize}`,
+      );
       throw new InternalServerErrorException('Internal server error');
     }
   }

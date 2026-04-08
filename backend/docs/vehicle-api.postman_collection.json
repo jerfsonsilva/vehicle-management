@@ -17,6 +17,14 @@
     {
       "key": "importDate",
       "value": ""
+    },
+    {
+      "key": "vehiclesPage",
+      "value": "1"
+    },
+    {
+      "key": "vehiclesPageSize",
+      "value": "10"
     }
   ],
   "item": [
@@ -147,19 +155,30 @@
       }
     },
     {
-      "name": "Vehicle - List All",
+      "name": "Vehicle - List (paginated)",
       "request": {
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/vehicles",
+          "raw": "{{baseUrl}}/vehicles?page={{vehiclesPage}}&pageSize={{vehiclesPageSize}}",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
             "vehicles"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "{{vehiclesPage}}"
+            },
+            {
+              "key": "pageSize",
+              "value": "{{vehiclesPageSize}}"
+            }
           ]
-        }
+        },
+        "description": "Lista paginada de veiculos. page >= 1, pageSize em [10,20,50,100]. Resposta: items, page, pageSize, total, totalPages."
       }
     },
     {

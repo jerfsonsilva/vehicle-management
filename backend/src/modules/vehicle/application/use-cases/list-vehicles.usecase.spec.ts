@@ -49,8 +49,6 @@ describe('ListVehiclesUseCase', () => {
 
     await expect(
       useCase.execute({ page: 1, pageSize: 10 }),
-    ).rejects.toBeInstanceOf(
-      InternalServerErrorException,
-    );
+    ).rejects.toBeInstanceOf(InternalServerErrorException);
   });
 });

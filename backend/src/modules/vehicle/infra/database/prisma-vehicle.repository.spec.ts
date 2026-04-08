@@ -170,9 +170,9 @@ describe('PrismaVehicleRepository', () => {
     const unknown = new Error('unknown');
     prismaMock.vehicle.findMany.mockRejectedValue(unknown);
 
-    await expect(
-      repository.findAll({ page: 1, pageSize: 10 }),
-    ).rejects.toBe(unknown);
+    await expect(repository.findAll({ page: 1, pageSize: 10 })).rejects.toBe(
+      unknown,
+    );
   });
 
   it('should throw not found on update with missing record (P2025)', async () => {

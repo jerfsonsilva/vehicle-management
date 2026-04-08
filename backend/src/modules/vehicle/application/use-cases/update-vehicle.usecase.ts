@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { VehicleEntity } from '../../domain/entities/vehicle.entity';
@@ -18,12 +19,16 @@ export type UpdateVehicleCommand = {
 
 @Injectable()
 export class UpdateVehicleUseCase {
+  private readonly logger = new Logger(UpdateVehicleUseCase.name);
+
   constructor(private readonly vehicleRepository: VehicleRepository) {}
 
   async execute(command: UpdateVehicleCommand): Promise<VehicleEntity> {
+    this.logger.log(`Updating vehicle id=${command.id}`);
     try {
       const current = await this.vehicleRepository.findById(command.id);
       if (!current) {
+        this.logger.warn(`Vehicle not found for update id=${command.id}`);
         throw new NotFoundException('Vehicle not found');
       }
 
@@ -37,11 +42,17 @@ export class UpdateVehicleUseCase {
         command.year ?? current.year,
       );
 
-      return this.vehicleRepository.update(updated);
+      const result = await this.vehicleRepository.update(updated);
+      this.logger.log(`Vehicle updated id=${command.id}`);
+      return result;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
+      this.logger.error(
+        `Vehicle update failed id=${command.id}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw new InternalServerErrorException('Internal server error');
     }
   }

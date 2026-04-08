@@ -62,7 +62,9 @@ export class PrismaVehicleRepository implements VehicleRepository {
       : null;
   }
 
-  async findAll(params: VehiclePaginationParams): Promise<VehiclePaginatedResult> {
+  async findAll(
+    params: VehiclePaginationParams,
+  ): Promise<VehiclePaginatedResult> {
     const skip = (params.page - 1) * params.pageSize;
     const rowsRaw = await this.vehicleModel.findMany({
       orderBy: { createdAt: 'desc' },
