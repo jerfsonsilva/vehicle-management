@@ -21,7 +21,7 @@
     "start:prod": "node dist/main",
     "start:worker": "node dist/main.worker",
     "start:worker:dev": "nest start --watch --entryFile main.worker",
-    "test": "jest",
+    "test": "jest --silent",
     "test:unit": "jest --runInBand",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -86,6 +86,9 @@
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
