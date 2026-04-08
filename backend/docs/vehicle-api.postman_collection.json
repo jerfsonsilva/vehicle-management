@@ -100,7 +100,7 @@
             "csv"
           ]
         },
-        "description": "Envia cada linha valida como uma mensagem SQS. Resposta: queuedCount, rejectedRowCount."
+        "description": "Envia cada linha valida como uma mensagem SQS. Resposta: queuedCount, rejectedRowCount. Consulte GET /vehicles/import/status para acompanhar status em tempo real da importacao."
       }
     },
     {
@@ -126,7 +126,7 @@
             }
           ]
         },
-        "description": "Agregado do dia UTC: successCount, failureCount, day. Opcional: ative query date=YYYY-MM-DD e defina importDate."
+        "description": "Agregado do dia UTC: successCount, failureCount, day e status (idle | processing | completed). Regra de status: processing quando ha backlog/in-flight na SQS; completed quando fila esta vazia e houve processamento no dia; idle quando fila vazia e sem processamento no dia. Opcional: ative query date=YYYY-MM-DD e defina importDate."
       }
     },
     {

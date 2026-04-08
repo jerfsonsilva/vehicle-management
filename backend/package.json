@@ -10,6 +10,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "build": "nest build",
     "format": "prettier --write --no-error-on-unmatched-pattern \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

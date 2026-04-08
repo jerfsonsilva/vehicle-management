@@ -1,16 +1,27 @@
 import { Injectable } from '@nestjs/common';
+import { VehicleImportQueueMonitor } from '../../domain/ports/vehicle-import-queue-monitor';
 import { VehicleImportStatRepository } from '../../domain/repositories/vehicle-import-stat.repository';
 import { startOfUtcDay } from '../../domain/utils/utc-day.util';
+
+export enum VehicleImportStatus {
+  Idle = 'idle',
+  Processing = 'processing',
+  Completed = 'completed',
+}
 
 export type VehicleImportDailyStatusResult = {
   successCount: number;
   failureCount: number;
   day: string;
+  status: VehicleImportStatus;
 };
 
 @Injectable()
 export class GetVehicleImportDailyStatusUseCase {
-  constructor(private readonly statRepository: VehicleImportStatRepository) {}
+  constructor(
+    private readonly statRepository: VehicleImportStatRepository,
+    private readonly queueMonitor: VehicleImportQueueMonitor,
+  ) {}
 
   async execute(dateInput?: string): Promise<VehicleImportDailyStatusResult> {
     const day =
@@ -20,11 +31,20 @@ export class GetVehicleImportDailyStatusUseCase {
 
     const normalized = startOfUtcDay(day);
     const snapshot = await this.statRepository.findByUtcDay(normalized);
+    const runtimeStatus = await this.queueMonitor.getRuntimeStatus();
+    const hasMessagesInQueue = runtimeStatus.visible + runtimeStatus.inFlight > 0;
+    const hasProcessedMessagesToday =
+      (snapshot?.successCount ?? 0) + (snapshot?.failureCount ?? 0) > 0;
 
     return {
       successCount: snapshot?.successCount ?? 0,
       failureCount: snapshot?.failureCount ?? 0,
       day: normalized.toISOString().slice(0, 10),
+      status: hasMessagesInQueue
+        ? VehicleImportStatus.Processing
+        : hasProcessedMessagesToday
+          ? VehicleImportStatus.Completed
+          : VehicleImportStatus.Idle,
     };
   }
 }

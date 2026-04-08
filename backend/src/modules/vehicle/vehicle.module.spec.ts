@@ -8,11 +8,13 @@ import { GetVehicleUseCase } from './application/use-cases/get-vehicle.usecase';
 import { ListVehiclesUseCase } from './application/use-cases/list-vehicles.usecase';
 import { ProcessVehicleImportMessageUseCase } from './application/use-cases/process-vehicle-import-message.usecase';
 import { UpdateVehicleUseCase } from './application/use-cases/update-vehicle.usecase';
+import { VehicleImportQueueMonitor } from './domain/ports/vehicle-import-queue-monitor';
 import { VehicleImportQueue } from './domain/ports/vehicle-import.queue';
 import { VehicleImportStatRepository } from './domain/repositories/vehicle-import-stat.repository';
 import { VehicleRepository } from './domain/repositories/vehicle.repository';
 import { PrismaVehicleImportStatRepository } from './infra/database/prisma-vehicle-import-stat.repository';
 import { PrismaVehicleRepository } from './infra/database/prisma-vehicle.repository';
+import { SqsVehicleImportQueueMonitor } from './infra/sqs/sqs-vehicle-import.queue-monitor';
 import { SqsVehicleImportQueue } from './infra/sqs/sqs-vehicle-import.queue';
 import { VehicleImportController } from './presentation/vehicle-import.controller';
 import { VehicleController } from './presentation/vehicle.controller';
@@ -47,6 +49,10 @@ describe('VehicleModule', () => {
       {
         provide: VehicleImportQueue,
         useClass: SqsVehicleImportQueue,
+      },
+      {
+        provide: VehicleImportQueueMonitor,
+        useClass: SqsVehicleImportQueueMonitor,
       },
       {
         provide: VehicleImportStatRepository,
